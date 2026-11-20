@@ -1,0 +1,12 @@
+/* Long equations scroll sideways instead of breaking the layout on phones. */
+.katex-display {
+	overflow-x: auto;
+	overflow-y: hidden;
+	padding-block: 0.25rem;
+}
+
+/* Topic checklists on course overview pages. */
+.sl-markdown-content ul.contains-task-list {
+	list-style: none;
+	padding-inline-start: 0.25rem;
+}
