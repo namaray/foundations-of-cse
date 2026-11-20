@@ -11,9 +11,16 @@ const REPO = 'https://github.com/namaray/foundations-of-cse';
 // sub-group per course, with every note in the course folder listed automatically.
 const sidebar = syllabus.map((area) =>
 	area.courses.length === 1 && area.courses[0].title === area.label
-		? { label: area.label, items: [{ autogenerate: { directory: area.courses[0].slug } }] }
+		? {
+				label: area.label,
+				collapsed: true,
+				items: [{ autogenerate: { directory: area.courses[0].slug } }],
+			}
 		: {
 				label: area.label,
+				// Starlight opens the group that contains the current page,
+				// so only the course you're in is expanded.
+				collapsed: true,
 				items: area.courses.map((course) => ({
 					label: course.title,
 					collapsed: true,
@@ -45,6 +52,8 @@ export default defineConfig({
 			],
 			components: {
 				ThemeProvider: './src/components/ThemeProvider.astro',
+				PageTitle: './src/components/PageTitle.astro',
+				Pagination: './src/components/Pagination.astro',
 			},
 			sidebar,
 		}),

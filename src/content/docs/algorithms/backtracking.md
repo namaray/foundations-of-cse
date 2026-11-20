@@ -2,7 +2,12 @@
 title: Backtracking & Branch and Bound
 description: State-space trees, backtracking for N-Queens, subset sum, graph colouring and Hamiltonian cycles, and branch and bound for 0/1 knapsack and the travelling salesman problem.
 sidebar:
+  label: "12. Backtracking"
   order: 12
+lesson:
+  module: Further topics
+  minutes: 30
+  priority: medium
 ---
 
 Some problems have no known fast algorithm, so we must search through possible solutions. **Backtracking** and **branch and bound** search systematically and **prune** branches that cannot lead to a (better) solution, which is often far faster than trying everything.

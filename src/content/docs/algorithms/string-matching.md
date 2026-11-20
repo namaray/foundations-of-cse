@@ -2,7 +2,12 @@
 title: String Matching
 description: Finding a pattern in a text with the naive algorithm, Rabin–Karp rolling hashes, and the Knuth–Morris–Pratt algorithm with a worked prefix-function example.
 sidebar:
+  label: "11. String matching"
   order: 11
+lesson:
+  module: Further topics
+  minutes: 35
+  priority: medium
 ---
 
 **Problem.** Find every position where a pattern $P$ of length $m$ occurs in a text $T$ of length $n$.

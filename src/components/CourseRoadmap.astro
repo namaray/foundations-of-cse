@@ -1,0 +1,247 @@
+---
+// The study path for one course: lessons grouped into modules, with time,
+// exam priority and progress saved in this browser.
+import { getCollection } from 'astro:content';
+
+interface Props {
+	course: string;
+}
+const { course } = Astro.props;
+
+const lessons = (await getCollection('docs', (e) => e.id.startsWith(course + '/') && e.data.lesson))
+	.sort((a, b) => (a.data.sidebar.order ?? 99) - (b.data.sidebar.order ?? 99))
+	.map((e, i) => ({
+		id: e.id,
+		n: i + 1,
+		// Use the short sidebar label ("2. Sorting" → "Sorting") so names match the sidebar.
+		title: e.data.sidebar.label?.replace(/^\d+\.\s*/, '') ?? e.data.title,
+		href: `/${e.id}/`,
+		...e.data.lesson!,
+	}));
+
+const modules: { name: string; items: typeof lessons }[] = [];
+for (const l of lessons) {
+	const last = modules.at(-1);
+	if (last && last.name === l.module) last.items.push(l);
+	else modules.push({ name: l.module, items: [l] });
+}
+
+const totalMinutes = lessons.reduce((s, l) => s + l.minutes, 0);
+const hours = Math.round(totalMinutes / 30) / 2; // nearest half hour
+---
+
+<div class="roadmap not-content" data-lessons={JSON.stringify(lessons.map((l) => ({ id: l.id, title: l.title, href: l.href })))}>
+	<div class="roadmap-head">
+		<p class="roadmap-stats">
+			{lessons.length} lessons · about {hours} hours
+		</p>
+		<div class="roadmap-bar" role="progressbar" aria-label="Lessons done" aria-valuemin="0" aria-valuemax={lessons.length} aria-valuenow="0">
+			<span class="roadmap-fill"></span>
+		</div>
+		<p class="roadmap-progress">
+			<span class="roadmap-count">0 of {lessons.length} done</span>
+			<a class="roadmap-continue" href={lessons[0]?.href}>Start with lesson 1: {lessons[0]?.title}</a>
+		</p>
+	</div>
+
+	{
+		modules.map((m, mi) => (
+			<section class="roadmap-module">
+				<h2 class="roadmap-module-title">
+					<span>Module {mi + 1}</span> {m.name}
+				</h2>
+				<ol class="roadmap-list">
+					{m.items.map((l) => (
+						<li class="roadmap-item" data-id={l.id}>
+							<span class="roadmap-check" aria-hidden="true" />
+							<a href={l.href}>
+								<span class="roadmap-n">{l.n}.</span> {l.title}
+							</a>
+							<span class="roadmap-meta">
+								{l.priority === 'high' && <span class="roadmap-high">High priority</span>}
+								<span class="roadmap-min">{l.minutes} min</span>
+							</span>
+							<span class="sr-only roadmap-sr" />
+						</li>
+					))}
+				</ol>
+			</section>
+		))
+	}
+</div>
+
+<script>
+	import { isDone, countDone } from '../lib/progress';
+
+	for (const map of document.querySelectorAll<HTMLElement>('.roadmap')) {
+		const lessons: { id: string; title: string; href: string }[] = JSON.parse(map.dataset.lessons || '[]');
+		const ids = lessons.map((l) => l.id);
+		const done = countDone(ids);
+
+		map.querySelector<HTMLElement>('.roadmap-count')!.textContent = `${done} of ${ids.length} done`;
+		map.querySelector<HTMLElement>('.roadmap-fill')!.style.width = `${(done / Math.max(ids.length, 1)) * 100}%`;
+		map.querySelector<HTMLElement>('.roadmap-bar')!.setAttribute('aria-valuenow', String(done));
+
+		const nextIdx = lessons.findIndex((l) => !isDone(l.id));
+		const cont = map.querySelector<HTMLAnchorElement>('.roadmap-continue')!;
+		if (nextIdx === -1) {
+			cont.textContent = 'All lessons done. Revise with the cheat sheet';
+			cont.href = lessons.at(-1)?.href ?? cont.href;
+		} else if (done > 0) {
+			cont.textContent = `Continue with lesson ${nextIdx + 1}: ${lessons[nextIdx].title}`;
+			cont.href = lessons[nextIdx].href;
+		}
+
+		for (const li of map.querySelectorAll<HTMLElement>('.roadmap-item')) {
+			const isNext = nextIdx >= 0 && li.dataset.id === lessons[nextIdx].id;
+			if (isDone(li.dataset.id!)) {
+				li.classList.add('is-done');
+				li.querySelector('.roadmap-sr')!.textContent = '(done)';
+			} else if (isNext && done > 0) {
+				li.classList.add('is-next');
+				li.querySelector('.roadmap-sr')!.textContent = '(up next)';
+			}
+		}
+	}
+</script>
+
+<style>
+	.roadmap {
+		margin-block: 1.5rem 2rem;
+	}
+	.roadmap-head {
+		padding: 1.1rem 1.25rem;
+		border: 1px solid var(--sl-color-hairline-light);
+		border-radius: 0.75rem;
+		background: var(--cse-surface-2);
+		margin-bottom: 1.75rem;
+	}
+	.roadmap-stats {
+		margin: 0 0 0.6rem;
+		color: var(--sl-color-gray-3);
+	}
+	.roadmap-bar {
+		height: 0.5rem;
+		border-radius: 999px;
+		background: var(--sl-color-gray-6);
+		overflow: hidden;
+	}
+	:global([data-theme='light']) .roadmap-bar {
+		background: var(--sl-color-gray-5);
+	}
+	.roadmap-fill {
+		display: block;
+		height: 100%;
+		width: 0;
+		background: var(--cse-teal);
+		border-radius: inherit;
+	}
+	.roadmap-progress {
+		margin: 0.6rem 0 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 1rem;
+		justify-content: space-between;
+	}
+	.roadmap-count {
+		color: var(--sl-color-gray-3);
+	}
+	.roadmap-continue {
+		font-weight: 700;
+		color: var(--sl-color-text-accent);
+	}
+
+	.roadmap-module + .roadmap-module {
+		margin-top: 1.75rem;
+	}
+	.roadmap-module-title {
+		margin: 0 0 0.5rem;
+		font-size: var(--sl-text-xl);
+		font-weight: 700;
+		color: var(--sl-color-white);
+	}
+	.roadmap-module-title span {
+		display: block;
+		font-size: var(--sl-text-sm);
+		font-weight: 400;
+		color: var(--sl-color-gray-3);
+	}
+	.roadmap-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		border-top: 1px solid var(--sl-color-hairline);
+	}
+	.roadmap-item {
+		display: grid;
+		grid-template-columns: 1.4rem minmax(0, 1fr) auto;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.7rem 0.25rem;
+		border-bottom: 1px solid var(--sl-color-hairline);
+	}
+	.roadmap-check {
+		width: 1.1rem;
+		height: 1.1rem;
+		border: 2px solid var(--sl-color-gray-4);
+		border-radius: 50%;
+		display: grid;
+		place-items: center;
+		font-size: 0.75rem;
+		line-height: 1;
+	}
+	.roadmap-item a {
+		color: var(--sl-color-white);
+		text-decoration: none;
+		font-weight: 600;
+	}
+	.roadmap-item a:hover {
+		text-decoration: underline;
+		text-underline-offset: 0.18em;
+	}
+	.roadmap-n {
+		color: var(--sl-color-gray-3);
+		font-weight: 400;
+	}
+	.roadmap-meta {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+		white-space: nowrap;
+	}
+	.roadmap-high {
+		padding: 0.1rem 0.5rem;
+		border-radius: 999px;
+		color: var(--cse-amber);
+		background: var(--cse-amber-soft);
+		font-weight: 700;
+	}
+	.is-done .roadmap-check {
+		border-color: var(--cse-teal);
+		background: var(--cse-teal);
+		color: var(--sl-color-black);
+	}
+	.is-done .roadmap-check::after {
+		content: '✓';
+	}
+	.is-done a {
+		color: var(--sl-color-gray-3);
+	}
+	.is-next {
+		background: color-mix(in srgb, var(--sl-color-accent) 8%, transparent);
+	}
+	.is-next .roadmap-check {
+		border-color: var(--sl-color-accent);
+	}
+	@media (max-width: 30rem) {
+		.roadmap-item {
+			grid-template-columns: 1.4rem minmax(0, 1fr);
+			row-gap: 0.2rem;
+		}
+		.roadmap-meta {
+			grid-column: 2;
+		}
+	}
+</style>

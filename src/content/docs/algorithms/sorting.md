@@ -1,44 +1,43 @@
 ---
 title: Sorting
-description: Elementary sorts, merge sort, quicksort and heapsort, linear-time counting, radix and bucket sort, the Ω(n log n) lower bound, and stability, with worked examples.
+description: Insertion sort, merge sort, quicksort and heapsort, the Ω(n log n) lower bound, and linear-time counting and radix sort, with worked examples.
 sidebar:
+  label: "2. Sorting"
   order: 2
+lesson:
+  module: Foundations
+  minutes: 50
+  priority: high
+  prerequisites:
+    - label: Recurrences
+      link: /algorithms/recurrences/
+    - label: Heaps
+      link: /data-structures/heaps/
+  outcomes:
+    - Trace merge sort and a quicksort partition by hand
+    - Give the best, average and worst case of each major sort, and say which are stable
+    - Explain why no comparison sort can beat $\Omega(n \log n)$
+    - Use counting sort or radix sort when the keys allow it
+  keyIdea: Comparison sorts can't beat $n \log n$. **Merge sort** guarantees it, **quicksort** is usually fastest in practice, and **counting** and **radix sort** go faster only by using the key values instead of comparing them.
 ---
 
-Sorting puts items in order. It is the most studied problem in algorithms because so many other algorithms (binary search, greedy algorithms, duplicate detection) start by sorting.
+Sorting puts items in order. Many other algorithms, such as binary search and most greedy algorithms, start by sorting, so it's worth knowing the main methods well.
 
-## Summary table
+## Two words you'll need
 
-| Algorithm | Best | Average | Worst | Extra space | Stable | In place |
-|---|---|---|---|---|---|---|
-| Bubble sort (with early exit) | $n$ | $n^2$ | $n^2$ | $O(1)$ | Yes | Yes |
-| Selection sort | $n^2$ | $n^2$ | $n^2$ | $O(1)$ | No | Yes |
-| Insertion sort | $n$ | $n^2$ | $n^2$ | $O(1)$ | Yes | Yes |
-| Merge sort | $n \log n$ | $n \log n$ | $n \log n$ | $O(n)$ | Yes | No |
-| Quicksort | $n \log n$ | $n \log n$ | $n^2$ | $O(\log n)$ stack | No | Yes |
-| Heapsort | $n \log n$ | $n \log n$ | $n \log n$ | $O(1)$ | No | Yes |
-| Counting sort | $n + k$ | $n + k$ | $n + k$ | $O(n + k)$ | Yes | No |
-| Radix sort | $d(n + k)$ | $d(n + k)$ | $d(n + k)$ | $O(n + k)$ | Yes | No |
-| Bucket sort | $n$ | $n$ | $n^2$ | $O(n)$ | Yes | No |
+- **Stable:** items with equal keys stay in their original order. This matters when you sort by one field and then another.
+- **In place:** the sort uses only $O(1)$ extra memory (or $O(\log n)$ for the recursion stack).
 
-Here $k$ is the range of key values and $d$ the number of digits.
+## 1. Insertion sort: the simple baseline
 
-A sort is **stable** if equal keys keep their original relative order. Stability matters when you sort by one field and then another, and it is required for the digit passes of radix sort.
-
-## Elementary sorts
-
-**Bubble sort** repeatedly swaps adjacent out-of-order pairs. After pass $i$, the $i$ largest items are in their final places. Stopping when a pass makes no swaps gives $O(n)$ on already sorted input.
-
-**Selection sort** finds the minimum of the unsorted part and swaps it to the front. It always makes $\Theta(n^2)$ comparisons but only $O(n)$ swaps, which helps when writes are expensive.
-
-**Insertion sort** takes each item and shifts it left into place among the already-sorted items, like sorting a hand of cards.
+Take each item in turn and slide it left into place among the items already sorted, as you would sort a hand of cards.
 
 ```c
 void insertion_sort(int a[], int n) {
     for (int j = 1; j < n; j++) {
         int key = a[j], i = j - 1;
         while (i >= 0 && a[i] > key) {
-            a[i + 1] = a[i];   // shift right
+            a[i + 1] = a[i];   // shift larger items right
             i--;
         }
         a[i + 1] = key;
@@ -46,22 +45,36 @@ void insertion_sort(int a[], int n) {
 }
 ```
 
-Insertion sort is fast on small or nearly sorted arrays: its running time is $O(n + I)$, where $I$ is the number of inversions (out-of-order pairs). Library sorts use it for small subarrays.
+- **Worst and average case:** $\Theta(n^2)$, for example on reverse-sorted input.
+- **Best case:** $\Theta(n)$ on sorted input. In general it takes $O(n + I)$ time, where $I$ is the number of out-of-order pairs.
+- Stable and in place.
 
-## Merge sort
+Because it is so fast on small or nearly sorted arrays, real library sorts switch to insertion sort for small pieces.
 
-**Divide** the array in half, **sort** each half recursively, and **merge** the two sorted halves.
+<details class="go-deeper">
+<summary>Go deeper: bubble sort and selection sort</summary>
+
+**Bubble sort** repeatedly swaps neighbouring pairs that are out of order; after pass $i$ the $i$ largest items are in place. Stopping when a pass makes no swaps gives $O(n)$ on sorted input. Stable.
+
+**Selection sort** finds the smallest remaining item and swaps it to the front. Always $\Theta(n^2)$ comparisons, but only $O(n)$ swaps, which helps when writing is expensive. Not stable.
+
+Both are $\Theta(n^2)$ on average and are mainly asked about in exams, not used in practice.
+</details>
+
+## 2. Merge sort: always n log n
+
+**Split** the array in half, **sort** each half recursively, then **merge** the two sorted halves.
 
 ```text
 [38 27 43 3 9 82 10]
-[38 27 43 3]         [9 82 10]
-[38 27] [43 3]       [9 82] [10]
-[27 38] [3 43]       [9 82] [10]
-[3 27 38 43]         [9 10 82]
-[3 9 10 27 38 43 82]
+[38 27 43 3]         [9 82 10]          split
+[38 27] [43 3]       [9 82] [10]        split
+[27 38] [3 43]       [9 82] [10]        sort pairs
+[3 27 38 43]         [9 10 82]          merge
+[3 9 10 27 38 43 82]                    merge
 ```
 
-Merging two sorted lists of total length $n$ takes $\Theta(n)$: repeatedly take the smaller front item.
+Merging two sorted lists takes linear time: keep taking the smaller of the two front items.
 
 ```c
 void merge(int a[], int lo, int mid, int hi, int tmp[]) {
@@ -82,21 +95,21 @@ void merge_sort(int a[], int lo, int hi, int tmp[]) {
 }
 ```
 
-$T(n) = 2T(n/2) + \Theta(n) = \Theta(n \log n)$ in every case. Merge sort is the standard choice for **linked lists** and for **external sorting** of data too big for memory.
+- $T(n) = 2T(n/2) + \Theta(n) = \Theta(n \log n)$ in **every** case.
+- Stable, but needs $O(n)$ extra memory for arrays.
+- The standard choice for **linked lists** and for **external sorting** (data too big for memory).
 
-## Quicksort
+## 3. Quicksort: fastest in practice
 
-Pick a **pivot**, **partition** the array so smaller items are left of it and larger items right, then sort the two sides recursively. All the work happens in the partition; there is no merge step.
-
-**Lomuto partition** (pivot = last element):
+Pick a **pivot** and **partition** the array so smaller items end up on its left and larger items on its right. The pivot is now in its final place; sort the two sides recursively. All the work is in the partition, and there is nothing to merge afterwards.
 
 ```c
-int partition(int a[], int lo, int hi) {
+int partition(int a[], int lo, int hi) {   // Lomuto: pivot = last element
     int pivot = a[hi], i = lo - 1;
     for (int j = lo; j < hi; j++)
         if (a[j] <= pivot) { i++; swap(&a[i], &a[j]); }
     swap(&a[i + 1], &a[hi]);
-    return i + 1;            // pivot's final index
+    return i + 1;                          // pivot's final index
 }
 
 void quicksort(int a[], int lo, int hi) {
@@ -108,73 +121,72 @@ void quicksort(int a[], int lo, int hi) {
 }
 ```
 
-**Example:** partition `[2, 8, 7, 1, 3, 5, 6, 4]` with pivot 4.
+**Worked example:** partition `[2, 8, 7, 1, 3, 5, 6, 4]` around the pivot 4. `i` marks the end of the "≤ pivot" zone.
 
-| j | a[j] | Action | Array |
+| j | a[j] | Action | Array after |
 |---|---|---|---|
-| 0 | 2 | ≤ 4: i = 0, swap a[0], a[0] | 2 8 7 1 3 5 6 4 |
-| 1 | 8 | > 4 | 2 8 7 1 3 5 6 4 |
-| 2 | 7 | > 4 | 2 8 7 1 3 5 6 4 |
-| 3 | 1 | ≤ 4: i = 1, swap a[1], a[3] | 2 1 7 8 3 5 6 4 |
-| 4 | 3 | ≤ 4: i = 2, swap a[2], a[4] | 2 1 3 8 7 5 6 4 |
-| 5 | 5 | > 4 | 2 1 3 8 7 5 6 4 |
-| 6 | 6 | > 4 | 2 1 3 8 7 5 6 4 |
-| end | | swap a[3] with the pivot | **2 1 3 4 7 5 6 8** |
+| 0 | 2 | ≤ 4, so i = 0 and swap a[0] with itself | 2 8 7 1 3 5 6 4 |
+| 1, 2 | 8, 7 | > 4, skip | 2 8 7 1 3 5 6 4 |
+| 3 | 1 | ≤ 4, so i = 1 and swap a[1], a[3] | 2 1 7 8 3 5 6 4 |
+| 4 | 3 | ≤ 4, so i = 2 and swap a[2], a[4] | 2 1 3 8 7 5 6 4 |
+| 5, 6 | 5, 6 | > 4, skip | 2 1 3 8 7 5 6 4 |
+| end | | swap the pivot into a[3] | **2 1 3 4 7 5 6 8** |
 
-The pivot 4 is now at index 3, in its final position.
+**How fast is it?**
 
-### Analysis
+- **Average case** $\Theta(n \log n)$: the pivot usually splits the array into reasonable parts. Even a fixed 9-to-1 split still gives $\Theta(n \log n)$.
+- **Worst case** $\Theta(n^2)$: the pivot is always the smallest or largest item, for example a sorted array with the last element as pivot. Then $T(n) = T(n-1) + \Theta(n)$.
+- **The fix:** choose a random pivot, or the median of the first, middle and last items.
+- In place, but **not stable**.
 
-- **Best/average case:** the pivot splits the array roughly in half: $T(n) = 2T(n/2) + \Theta(n) = \Theta(n \log n)$. Even a fixed 9-to-1 split still gives $\Theta(n \log n)$.
-- **Worst case:** the pivot is always the smallest or largest item, for example when a sorted array is partitioned around its last element: $T(n) = T(n-1) + \Theta(n) = \Theta(n^2)$.
-- **Fixes:** choose a **random pivot** (expected $\Theta(n \log n)$ on every input) or the **median of three**.
+:::tip[Exam tip]
+When tracing a partition, write the array after every swap and mark where `i` is. Most lost marks come from forgetting the final swap that puts the pivot in place.
+:::
 
-In practice quicksort is usually the fastest comparison sort: its inner loop is tight and it is cache-friendly.
+## 4. Heapsort, in brief
 
-## Heapsort
+Build a max-heap in $O(n)$, then repeatedly swap the maximum to the end of the array and restore the heap. $\Theta(n \log n)$ in every case with $O(1)$ extra memory, but not stable. See [Heaps](/data-structures/heaps/#heapsort) for the full walkthrough.
 
-Build a max-heap in $O(n)$, then repeatedly move the maximum to the end and restore the heap. $\Theta(n \log n)$ worst case with $O(1)$ extra space, but not stable. Full details are in [Data Structures: Heaps](/data-structures/heaps/#heapsort).
+## 5. Why n log n is the limit
 
-## The Ω(n log n) lower bound
+**Any sort that works by comparing items needs $\Omega(n \log n)$ comparisons in the worst case.**
 
-**Any comparison-based sort needs $\Omega(n \log n)$ comparisons in the worst case.**
-
-Model the sort as a **decision tree**: each internal node is a comparison $a_i \le a_j$, and each leaf is one final ordering. A correct sort must be able to output every one of the $n!$ permutations, so the tree has at least $n!$ leaves. A binary tree of height $h$ has at most $2^h$ leaves, so
+Picture the sort as a **decision tree**: each internal node is one comparison, and each leaf is one possible final order. The sort must be able to produce any of the $n!$ orderings, so the tree needs at least $n!$ leaves. A binary tree of height $h$ has at most $2^h$ leaves, so
 
 $$
 2^h \ge n! \implies h \ge \log_2(n!) = \Theta(n \log n)
 $$
 
-(using Stirling's approximation, $\log_2 n! \approx n \log_2 n - 1.44n$). So merge sort and heapsort are **asymptotically optimal** comparison sorts.
+So merge sort and heapsort are as fast as a comparison sort can be.
 
-## Linear-time sorts
+## 6. Going faster without comparisons
 
-These beat $n \log n$ by **not comparing** keys. They need extra assumptions about the keys.
+If keys are small integers, you can sort them in linear time by **using their values** instead of comparing them.
 
 ### Counting sort
 
-For integer keys in the range $0 \dots k$:
+For integer keys from $0$ to $k$:
 
-1. Count how many times each value occurs.
+1. Count how often each value occurs.
 2. Turn the counts into running totals, so `C[v]` is the number of keys $\le v$.
-3. Walk the input **from right to left**, placing each key at position `C[key] − 1` and decrementing `C[key]`. Going right to left keeps it stable.
+3. Walk the input **from right to left**, placing each key at position `C[key] − 1`, then decrementing `C[key]`. Going right to left keeps it stable.
 
-**Example:** `A = [2, 5, 3, 0, 2, 3, 0, 3]`, $k = 5$.
+**Example:** `[2, 5, 3, 0, 2, 3, 0, 3]` with $k = 5$.
 
 | Value | 0 | 1 | 2 | 3 | 4 | 5 |
 |---|---|---|---|---|---|---|
 | Count | 2 | 0 | 2 | 3 | 0 | 1 |
 | Running total | 2 | 2 | 4 | 7 | 7 | 8 |
 
-Output: `[0, 0, 2, 2, 3, 3, 3, 5]`. Time $\Theta(n + k)$: excellent when $k = O(n)$, useless when keys range up to $10^9$.
+Result: `[0, 0, 2, 2, 3, 3, 3, 5]`. Time $\Theta(n + k)$, so it is only useful when $k$ is not much bigger than $n$.
 
 ### Radix sort
 
-Sort by the **least significant digit** first, then the next digit, and so on, using a stable sort (usually counting sort) for each pass.
+Sort by the **last digit** first, then the next digit, and so on, using a stable sort such as counting sort for each pass.
 
 **Example:** `[170, 45, 75, 90, 802, 24, 2, 66]`
 
-| Pass | Result |
+| After sorting by | Result |
 |---|---|
 | Ones digit | 170, 90, 802, 2, 24, 45, 75, 66 |
 | Tens digit | 802, 2, 24, 45, 66, 170, 75, 90 |
@@ -182,46 +194,65 @@ Sort by the **least significant digit** first, then the next digit, and so on, u
 
 $d$ passes of $\Theta(n + k)$ each give $\Theta(d(n + k))$.
 
-### Bucket sort
+<details class="go-deeper">
+<summary>Go deeper: bucket sort</summary>
 
-For keys spread **uniformly** over $[0, 1)$: create $n$ buckets, put each key in bucket $\lfloor n \cdot x \rfloor$, sort each bucket with insertion sort, and concatenate. Expected $\Theta(n)$; worst case $\Theta(n^2)$ if everything lands in one bucket.
+For keys spread evenly over $[0, 1)$: make $n$ buckets, put each key $x$ in bucket $\lfloor n x \rfloor$, sort each bucket with insertion sort, and join the buckets in order. Expected time $\Theta(n)$. If the keys all land in one bucket, it degrades to $\Theta(n^2)$.
+</details>
 
-## Which sort when?
+## Choosing a sort
 
-| Situation | Good choice |
-|---|---|
-| Small or nearly sorted array | Insertion sort |
-| Guaranteed $O(n \log n)$ and stable | Merge sort |
-| Fastest in practice, general purpose | Quicksort with a random or median-of-three pivot |
-| Guaranteed $O(n \log n)$ with $O(1)$ extra memory | Heapsort |
-| Linked list | Merge sort |
-| Small integer keys | Counting sort |
-| Fixed-length integers or strings | Radix sort |
+| Algorithm | Best | Average | Worst | Extra space | Stable |
+|---|---|---|---|---|---|
+| Insertion | $n$ | $n^2$ | $n^2$ | $O(1)$ | Yes |
+| Merge | $n \log n$ | $n \log n$ | $n \log n$ | $O(n)$ | Yes |
+| Quick | $n \log n$ | $n \log n$ | $n^2$ | $O(\log n)$ | No |
+| Heap | $n \log n$ | $n \log n$ | $n \log n$ | $O(1)$ | No |
+| Counting | $n + k$ | $n + k$ | $n + k$ | $O(n + k)$ | Yes |
+| Radix | $d(n + k)$ | $d(n + k)$ | $d(n + k)$ | $O(n + k)$ | Yes |
 
-Real libraries combine these. **Introsort** (C++ `std::sort`) runs quicksort, switches to heapsort if recursion gets too deep, and uses insertion sort for small pieces. **Timsort** (Python, Java objects) merges naturally sorted runs found with insertion sort.
+- **Small or nearly sorted data:** insertion sort.
+- **Must be stable, or sorting a linked list:** merge sort.
+- **General purpose, fastest in practice:** quicksort with a random or median-of-three pivot.
+- **Guaranteed $n \log n$ with little memory:** heapsort.
+- **Small integer keys:** counting sort. **Fixed-length numbers or strings:** radix sort.
 
-## Viva questions
+<details class="go-deeper">
+<summary>Go deeper: what real libraries use</summary>
+
+Real libraries combine these methods. **Introsort** (C++ `std::sort`) runs quicksort, switches to heapsort if the recursion gets too deep, and finishes small pieces with insertion sort. **Timsort** (Python, and Java for objects) finds runs that are already sorted and merges them, using insertion sort to build short runs.
+</details>
+
+## Summary
+
+- **Insertion sort** is $\Theta(n^2)$ but excellent on small or nearly sorted input.
+- **Merge sort** is always $\Theta(n \log n)$ and stable, at the cost of $O(n)$ extra memory.
+- **Quicksort** is $\Theta(n \log n)$ on average and fastest in practice, but $\Theta(n^2)$ in the worst case; a random pivot avoids that.
+- No comparison sort can beat $\Omega(n \log n)$, because a decision tree needs at least $n!$ leaves.
+- **Counting** and **radix sort** run in linear time by using key values, when keys are small integers or fixed-length.
+
+## Check yourself
 
 <details>
-<summary>Why is quicksort preferred over merge sort in practice, despite its O(n²) worst case?</summary>
+<summary>Why is quicksort usually preferred over merge sort, despite its O(n²) worst case?</summary>
 
-It sorts in place, its inner loop is very tight, and it accesses memory sequentially, which suits caches. A random pivot makes the worst case extremely unlikely. Merge sort needs $O(n)$ extra memory for arrays.
+It sorts in place, its inner loop is very short, and it reads memory in order, which suits caches. A random pivot makes the worst case extremely unlikely. Merge sort needs $O(n)$ extra memory for arrays.
 </details>
 
 <details>
-<summary>Can any sort be faster than O(n log n)?</summary>
+<summary>What input makes quicksort with the last element as pivot take O(n²)?</summary>
 
-Not a comparison sort, by the decision-tree argument. Counting, radix and bucket sort run in linear time because they use the keys' values directly instead of comparing them, which needs assumptions such as small integer keys or a uniform distribution.
+An array that is already sorted, or reverse sorted. Every partition puts all the remaining items on one side.
 </details>
 
 <details>
-<summary>Which of the common sorts are stable?</summary>
+<summary>Which of these sorts are stable: insertion, merge, quick, heap, counting?</summary>
 
-Bubble, insertion, merge, counting and radix sort are stable. Selection sort, quicksort and heapsort are not, in their usual forms.
+Insertion, merge and counting sort are stable. Quicksort and heapsort, in their usual forms, are not.
 </details>
 
 <details>
-<summary>What is the worst-case input for quicksort with the last element as pivot?</summary>
+<summary>Can any sort run faster than O(n log n)?</summary>
 
-An array that is already sorted (or reverse sorted). Every partition puts all remaining items on one side, giving $\Theta(n^2)$.
+Not a comparison sort, by the decision-tree argument. Counting, radix and bucket sort can, because they use the key values directly, but they need extra assumptions such as small integer keys or evenly spread values.
 </details>

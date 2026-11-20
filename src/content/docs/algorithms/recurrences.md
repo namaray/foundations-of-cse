@@ -2,7 +2,12 @@
 title: Analysing Algorithms & Recurrences
 description: Loop invariants and correctness, and solving recurrences with the substitution method, recursion trees and the Master theorem, with many worked examples.
 sidebar:
+  label: "1. Recurrences"
   order: 1
+lesson:
+  module: Foundations
+  minutes: 45
+  priority: high
 ---
 
 Asymptotic notation (Big-O, Ω, Θ) is covered in [Data Structures: Complexity Analysis](/data-structures/complexity-analysis/). This page covers the two other analysis skills every algorithms exam tests: **proving an algorithm correct** and **solving recurrences**.

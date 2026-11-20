@@ -2,7 +2,12 @@
 title: Divide and Conquer
 description: The divide-and-conquer paradigm with fast exponentiation, maximum subarray, counting inversions, Karatsuba multiplication, Strassen's algorithm and closest pair of points.
 sidebar:
+  label: "4. Divide and conquer"
   order: 4
+lesson:
+  module: Design paradigms
+  minutes: 35
+  priority: medium
 ---
 
 **Divide and conquer** solves a problem in three steps:

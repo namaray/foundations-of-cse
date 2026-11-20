@@ -2,7 +2,12 @@
 title: Searching
 description: Linear search, binary search and its variants (first/last occurrence, lower bound, binary search on the answer), interpolation and exponential search, and selection in linear time.
 sidebar:
+  label: "3. Searching"
   order: 3
+lesson:
+  module: Foundations
+  minutes: 25
+  priority: medium
 ---
 
 ## Linear search

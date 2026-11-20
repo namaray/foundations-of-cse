@@ -2,7 +2,12 @@
 title: Shortest Paths
 description: Relaxation, Dijkstra's algorithm with a worked example, why it fails on negative edges, Bellman–Ford and negative cycles, shortest paths in DAGs, and Floyd–Warshall for all pairs.
 sidebar:
+  label: "8. Shortest paths"
   order: 8
+lesson:
+  module: Graph algorithms
+  minutes: 45
+  priority: high
 ---
 
 Given a weighted graph, find the minimum-total-weight path from a source $s$ to other vertices. For unweighted graphs, [BFS](/algorithms/graph-traversal/#bfs-shortest-paths-in-unweighted-graphs) already solves this.

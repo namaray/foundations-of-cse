@@ -2,7 +2,12 @@
 title: Minimum Spanning Trees
 description: Spanning trees, the cut property, Kruskal's and Prim's algorithms with a worked example on the same graph, and their running times.
 sidebar:
+  label: "9. Minimum spanning trees"
   order: 9
+lesson:
+  module: Graph algorithms
+  minutes: 30
+  priority: high
 ---
 
 A **spanning tree** of a connected, undirected graph is a subset of edges that connects every vertex with no cycles. It always has exactly $V - 1$ edges. A **minimum spanning tree (MST)** is a spanning tree with the smallest total edge weight.

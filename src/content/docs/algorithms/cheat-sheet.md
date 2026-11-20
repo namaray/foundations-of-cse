@@ -2,11 +2,14 @@
 title: Algorithms Cheat Sheet
 description: One-page revision of algorithm running times, the Master theorem, design paradigms and the most-asked viva questions.
 sidebar:
-  label: Cheat sheet
+  label: "14. Cheat sheet"
   order: 20
   badge:
     text: Revision
     variant: note
+lesson:
+  module: Revision
+  minutes: 15
 ---
 
 Use this page for last-minute revision. Every row links back to the full notes.

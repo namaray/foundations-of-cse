@@ -2,7 +2,12 @@
 title: Greedy Algorithms
 description: The greedy choice and optimal substructure properties, exchange-argument proofs, and worked examples - activity selection, fractional knapsack, Huffman coding and job sequencing - plus cases where greedy fails.
 sidebar:
+  label: "5. Greedy algorithms"
   order: 5
+lesson:
+  module: Design paradigms
+  minutes: 40
+  priority: high
 ---
 
 A **greedy algorithm** builds a solution step by step, always taking the choice that looks best **right now**, and never reconsidering it. Greedy algorithms are simple and fast, but they are only correct for problems with the right structure.

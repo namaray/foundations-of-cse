@@ -199,6 +199,29 @@ body {
 	text-align: center;
 }
 
+/* ---------- "Go deeper" boxes: optional extra detail in lessons ---------- */
+.sl-markdown-content details.go-deeper {
+	border: 1px dashed var(--sl-color-gray-4);
+	border-radius: 0.6rem;
+	padding: 0.15rem 1rem;
+	background: transparent;
+}
+.sl-markdown-content details.go-deeper > summary {
+	color: var(--sl-color-gray-2);
+	font-weight: 700;
+	padding-block: 0.6rem;
+	cursor: pointer;
+}
+.sl-markdown-content details.go-deeper[open] > summary {
+	border-bottom: 1px solid var(--sl-color-hairline);
+	margin-bottom: 0.75rem;
+}
+
+/* Lesson section headings that start with a number read as steps. */
+.sl-markdown-content h2 {
+	scroll-margin-top: 5rem;
+}
+
 /* Respect reduced-motion preferences site-wide. */
 @media (prefers-reduced-motion: reduce) {
 	*,

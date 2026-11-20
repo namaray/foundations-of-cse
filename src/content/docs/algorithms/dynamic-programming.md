@@ -2,7 +2,12 @@
 title: Dynamic Programming
 description: Overlapping subproblems and optimal substructure, memoisation vs tabulation, and worked tables for 0/1 knapsack, LCS, matrix chain multiplication, coin change, edit distance and LIS.
 sidebar:
+  label: "6. Dynamic programming"
   order: 6
+lesson:
+  module: Design paradigms
+  minutes: 60
+  priority: high
 ---
 
 **Dynamic programming (DP)** solves a problem by breaking it into subproblems, solving each subproblem **once**, and storing the answer so it is never recomputed.
