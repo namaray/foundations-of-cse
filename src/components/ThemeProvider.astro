@@ -1,0 +1,27 @@
+---
+// Same as Starlight's ThemeProvider, except a first-time visitor gets the white
+// (light) theme instead of following the OS setting. Once someone picks Dark,
+// Light or Auto in the header, their choice is remembered as usual.
+---
+
+{/* Inlined to avoid a flash of the wrong theme. */}
+<script is:inline>
+	(() => {
+		const key = 'starlight-theme';
+		let stored = null;
+		try {
+			stored = localStorage.getItem(key);
+			if (stored === null) {
+				stored = 'light';
+				localStorage.setItem(key, stored);
+			}
+		} catch {}
+		const theme =
+			stored === 'light' || stored === 'dark'
+				? stored
+				: window.matchMedia('(prefers-color-scheme: light)').matches
+					? 'light'
+					: 'dark';
+		document.documentElement.dataset.theme = theme;
+	})();
+</script>

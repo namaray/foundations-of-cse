@@ -1,0 +1,56 @@
+---
+title: Minimax & Alpha–Beta Simulation
+description: Step through minimax and alpha–beta pruning on a game tree, including uneven exam-style trees you build yourself.
+sidebar:
+  label: Minimax simulation
+  order: 40
+  badge:
+    text: Interactive
+    variant: tip
+---
+
+import MinimaxSimulation from '../../../components/sims/MinimaxSimulation.astro';
+
+Watch minimax, and then alpha–beta pruning, explore a game tree one step at a time.
+
+<MinimaxSimulation />
+
+## How to read it
+
+- **Up triangles (▲) are MAX nodes.** They take the largest value among their children. **Down triangles (▼) are MIN nodes** and take the smallest. Squares at the bottom are terminal states, labelled with their utility.
+- Minimax is a **depth-first** search: it reaches the leftmost leaf before it can assign a value to anything.
+- A node's value is final only when the search *returns* from it. The running value $v$ you see updating is the best so far.
+
+## What alpha–beta adds
+
+In alpha–beta mode each node also shows its bounds:
+
+- $\alpha$ is the best value MAX can already guarantee on this path.
+- $\beta$ is the best value MIN can already guarantee on this path.
+- At a MAX node, once $v \ge \beta$ the remaining children are **pruned**: MIN would never let play reach this node.
+- At a MIN node the mirror condition is $v \le \alpha$.
+
+When a cut happens, the node is outlined in red and a badge states the comparison, for example **v = 7 ≥ β = 6 ✂**. The badge stays (dimmed) so you can review every cut once the run ends.
+
+**Pruning never changes the root value, only the amount of work.** Run both algorithms on the same tree and compare *Nodes visited*. With good move ordering alpha–beta examines $O(b^{m/2})$ nodes instead of $O(b^m)$. Randomise the leaves a few times to see the count swing between the two.
+
+## Building your own tree
+
+The **Structure** field takes nested brackets, so you can enter uneven trees from worksheets:
+
+- A **number** is a terminal node.
+- A **bracketed group** is an internal node whose children are listed inside.
+- Levels alternate MAX, MIN, MAX… from the root, so you never need to label node types.
+
+For example, `(((5 9) (6 (14 10) 2) (12 (7 16))) ((2 6) (15 9 7)))` is the uneven example in the Tree menu.
+
+## Two ways to write the cutoff test
+
+Textbooks order the bound update and the cutoff test differently. Both prune exactly the same branches; only the trace you read differs.
+
+| | AIMA: test, then update | Bound first: update, then test |
+|---|---|---|
+| At a MIN node | `if v ≤ α: return v` then `β ← min(β, v)` | `β ← min(β, v)` then `if β ≤ α: return v` |
+| Cut shows as | v = 2 ≤ α = 3 ✂ | β = 2 ≤ α = 3 ✂ |
+
+Flip the **Cutoff test** menu on any tree: *Nodes visited* and *Nodes pruned* never change.

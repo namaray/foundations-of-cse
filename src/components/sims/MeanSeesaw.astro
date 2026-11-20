@@ -1,0 +1,573 @@
+---
+// Ported from namaray/basic-statistics-simulations (mean-seesaw.html).
+// Colours follow the site's light/dark setting.
+---
+
+<div class="sim-seesaw not-content">
+<div class="page">
+<section aria-labelledby="h-balance">
+    <h2 id="h-balance">Balance it</h2>
+    <p>Each block is one number, placed where it belongs on the ruler. The label on a block says how far it sits from the pivot. Switch lists, or drag a block and watch the beam.</p>
+    <div class="chips" role="group" aria-label="Choose a list">
+      <button type="button" id="list-a" aria-pressed="true">15 15 16 16 17 17</button>
+      <button type="button" id="list-b" aria-pressed="false">14 15 16 16 17 18</button>
+    </div>
+    <div class="sides">
+      <div class="side left"><span class="label">Left of the pivot</span><span class="sum" id="left-sum"></span></div>
+      <div class="compare" id="compare" aria-hidden="true">=</div>
+      <div class="side right"><span class="label">Right of the pivot</span><span class="sum" id="right-sum"></span></div>
+    </div>
+    <div class="paper"><svg id="stage" role="group" aria-label="Seesaw with six draggable blocks. Focus a block and use the left and right arrow keys to move it."></svg></div>
+    <div class="status-row">
+      <p id="status" aria-live="polite"></p>
+      <button type="button" id="slide-pivot" hidden>Slide the pivot to the mean</button>
+    </div>
+    <div class="equation"><span id="eq-sum"></span><span id="eq-mean"></span></div>
+  </section>
+
+  <section aria-labelledby="h-even">
+    <h2 id="h-even">Even it out</h2>
+    <p>The mean is also the fair share. Stack up cubes for each number, then move the extras above the line into the gaps below it. This uses the same list as the seesaw.</p>
+    <div class="counts">
+      <div class="side right"><span class="label">Extra cubes above the line</span><span class="sum" id="extra-count"></span></div>
+      <div class="side left"><span class="label">Gaps below the line</span><span class="sum" id="gap-count"></span></div>
+    </div>
+    <div class="paper"><svg id="cubes" role="img" aria-label="Six stacks of cubes with a dashed line at the mean"></svg></div>
+    <div class="status-row">
+      <p id="cube-status" aria-live="polite"></p>
+      <div class="controls">
+        <button type="button" class="primary" id="move-cube">Move one cube</button>
+        <button type="button" id="put-back">Put them back</button>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-compare">
+    <h2 id="h-compare">The two lists, side by side</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">List</th><th scope="col">Left of 16</th><th scope="col">Right of 16</th><th scope="col">Total</th><th scope="col">Mean</th></tr></thead>
+        <tbody>
+          <tr><td>15 15 16 16 17 17</td><td class="l">1 + 1 = 2</td><td class="r">1 + 1 = 2</td><td>96</td><td>96 ÷ 6 = 16</td></tr>
+          <tr><td>14 15 16 16 17 18</td><td class="l">2 + 1 = 3</td><td class="r">1 + 2 = 3</td><td>96</td><td>96 ÷ 6 = 16</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The second list is more spread out, but it spreads by the same amount in both directions. One number went down by 1 and another went up by 1, so the total stays at 96 and the mean stays at 16.</p>
+    <p>You can also pair the numbers from the outside in: <span class="nums">14 + 18</span>, <span class="nums">15 + 17</span> and <span class="nums">16 + 16</span> all make 32. Halfway between each pair is 16.</p>
+  </section>
+</div>
+</div>
+
+<style is:global>
+
+.sim-seesaw {
+	--bg: var(--sl-color-black);
+	--panel: #fbfcfe;
+	--ink: #17233a;
+	--muted: #4f5c73;
+	--line: #d3dae6;
+	--grid: #e4e9f2;
+	--below: #2259c4;
+	--on-below: #ffffff;
+	--above: #b04b08;
+	--on-above: #ffffff;
+	--zero: #d5dce8;
+	--on-zero: #17233a;
+	--beam: #e6d9b8;
+	--on-beam: #3a3018;
+	--cube: #dde3ee;
+	--display: var(--__sl-font);
+	--body: var(--__sl-font);
+	color: var(--ink);
+	font: 400 1.0625rem/1.55 var(--body);
+	margin-block: 1.5rem;
+}
+:root[data-theme='dark'] .sim-seesaw {
+	--panel: #18212f; --ink: #edf1f8; --muted: #a5b1c5; --line: #334055; --grid: #1f2a3b;
+	--below: #74a7ff; --on-below: #0c1626; --above: #ffa256; --on-above: #24120a; --zero: #3b4759; --on-zero: #edf1f8;
+	--beam: #58492a; --on-beam: #f5e9cc; --cube: #2c374a;
+}
+
+.sim-seesaw {
+	[hidden] { display: none !important; }
+	* { box-sizing: border-box; }
+.page { max-width: 860px; margin: 0 auto; display: grid; gap: 40px; }
+.page > * { min-width: 0; }
+section, header { display: grid; gap: 14px; }
+section > *, header > * { min-width: 0; }
+h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h1 { font-weight: 800; font-size: clamp(2rem, 6vw, 3rem); line-height: 1.05; letter-spacing: -0.015em; }
+h2 { font-weight: 600; font-size: 1.5rem; line-height: 1.15; }
+p { margin: 0; max-width: 65ch; }
+.lede { font-size: 1.15rem; }
+.nums { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 700; }
+.muted { color: var(--muted); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+button {
+  font: 700 1rem/1.2 var(--body);
+  color: var(--ink);
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  min-height: 44px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+button:hover:not(:disabled) { background: var(--grid); }
+button:focus-visible, .block:focus-visible { outline: 3px solid var(--below); outline-offset: 2px; }
+button[aria-pressed="true"], button.primary { background: var(--ink); color: var(--bg); }
+button[aria-pressed="true"]:hover:not(:disabled), button.primary:hover:not(:disabled) { background: var(--ink); opacity: 0.88; }
+button:disabled { opacity: 0.4; cursor: default; }
+
+.sides { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: stretch; }
+.side { display: grid; gap: 2px; min-width: 0; padding: 10px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+.side.left { border-top: 4px solid var(--below); }
+.side.right { border-top: 4px solid var(--above); }
+.side .label { font-size: 0.85rem; color: var(--muted); }
+.side .sum { font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.compare { font: 800 2.4rem/1 var(--display); min-width: 1.1em; text-align: center; align-self: center; }
+
+.paper {
+  background-color: var(--panel);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+#stage, #cubes { display: block; width: 100%; overflow: visible; user-select: none; -webkit-user-select: none; }
+#stage text, #cubes text { font-family: var(--body); font-variant-numeric: tabular-nums; }
+.block { cursor: grab; touch-action: none; outline: none; }
+.block.dragging { cursor: grabbing; }
+.block rect { stroke: var(--panel); stroke-width: 1.5; }
+.block text { font-weight: 700; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.block.below rect { fill: var(--below); } .block.below text { fill: var(--on-below); }
+.block.above rect { fill: var(--above); } .block.above text { fill: var(--on-above); }
+.block.zero rect { fill: var(--zero); } .block.zero text { fill: var(--on-zero); }
+.beam-bar { fill: var(--beam); stroke: var(--on-beam); stroke-width: 1; }
+.beam-num { fill: var(--on-beam); font-weight: 700; font-size: 14px; text-anchor: middle; dominant-baseline: central; }
+.pivot { fill: var(--ink); }
+.pivot-num { fill: var(--bg); font-weight: 700; font-size: 12px; text-anchor: middle; }
+.ground { stroke: var(--ink); stroke-width: 2; }
+.mean-tick { stroke: var(--ink); stroke-width: 2; }
+.mean-text { fill: var(--ink); font-weight: 700; font-size: 13px; text-anchor: middle; }
+
+.equation { font-size: 1.1rem; font-variant-numeric: tabular-nums; font-weight: 700; display: flex; flex-wrap: wrap; column-gap: 20px; }
+.status-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.status-row > p { flex: 1 1 320px; min-width: 0; }
+
+.counts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; }
+.cube-mid { fill: var(--cube); }
+.cube-extra { fill: var(--above); }
+.cube-hole { fill: none; stroke: var(--below); stroke-width: 1.5; stroke-dasharray: 3 2; }
+.mean-line { stroke: var(--ink); stroke-width: 2; stroke-dasharray: 6 4; }
+.col-num { fill: var(--ink); font-weight: 700; font-size: 15px; text-anchor: middle; }
+.gutter-text { fill: var(--ink); font-size: 12px; }
+.gutter-num { fill: var(--ink); font-size: 15px; font-weight: 700; }
+
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 540px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-size: 0.85rem; font-weight: 400; color: var(--muted); }
+td:first-child { font-weight: 700; }
+td.l { color: var(--below); font-weight: 700; }
+td.r { color: var(--above); font-weight: 700; }
+@media (max-width: 480px) {
+  .side { padding: 8px 10px; }
+  .side .sum { font-size: 1.1rem; }
+  .compare { font-size: 1.8rem; }
+  .chips button { flex: 1 1 100%; }
+}
+
+}
+</style>
+
+<script>
+(function () {
+  const MIN = 12, MAX = 20, EPS = 1e-6;
+  const LISTS = { a: [15, 15, 16, 16, 17, 17], b: [14, 15, 16, 16, 17, 18] };
+  const BEAM_Y = 190, BEAM_T = 26, PIVOT_H = 46, BLOCK_H = 32, STAGE_H = 276;
+  const NS = 'http://www.w3.org/2000/svg';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = id => document.getElementById(id);
+  const stage = $('stage'), cubesSvg = $('cubes');
+
+  function svgEl(tag, attrs, parent) {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  const fmt = n => String(Math.round(n * 100) / 100);
+  const signed = n => n > EPS ? '+' + fmt(n) : n < -EPS ? '−' + fmt(-n) : '0';
+  const sameList = (x, y) => x.length === y.length && x.every((v, i) => v === y[i]);
+  const eqSign = n => Math.abs(n - Math.round(n * 100) / 100) < EPS ? '=' : '≈';
+
+  /* ---------- seesaw state ---------- */
+  let W = 0, unit = 0, pad = 14, blockW = 40;
+  let pivot = 16, pivotShown = 16, angle = 0, angVel = 0;
+  let orderCtr = 0, dragging = null, eventMsg = '', raf = 0, last = 0;
+  const xOf = v => pad + (v - MIN + 0.5) * unit;
+  const beamL = () => xOf(MIN - 0.5), beamR = () => xOf(MAX + 0.5);
+
+  /* static stage parts */
+  const groundLine = svgEl('line', { class: 'ground' }, stage);
+  const meanTick = svgEl('line', { class: 'mean-tick' }, stage);
+  const meanText = svgEl('text', { class: 'mean-text' }, stage);
+  const pivotTri = svgEl('polygon', { class: 'pivot' }, stage);
+  const pivotNum = svgEl('text', { class: 'pivot-num' }, stage);
+  const beam = svgEl('g', {}, stage);
+  const beamBar = svgEl('rect', { class: 'beam-bar', rx: 4 }, beam);
+  const beamNums = [];
+  for (let v = MIN; v <= MAX; v++) {
+    const t = svgEl('text', { class: 'beam-num', y: BEAM_Y }, beam);
+    t.textContent = v;
+    beamNums.push(t);
+  }
+
+  const blocks = LISTS.a.map((v, i) => {
+    const g = svgEl('g', { class: 'block', tabindex: 0, role: 'slider', 'aria-valuemin': MIN, 'aria-valuemax': MAX }, beam);
+    const rect = svgEl('rect', { rx: 4, height: BLOCK_H }, g);
+    const text = svgEl('text', { y: BLOCK_H / 2 }, g);
+    const b = { id: i, v, order: ++orderCtr, x: 0, lv: 0, g, rect, text };
+    g.addEventListener('pointerdown', e => startDrag(e, b));
+    g.addEventListener('keydown', e => {
+      const d = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0;
+      if (!d) return;
+      e.preventDefault();
+      moveBlock(b, Math.max(MIN, Math.min(MAX, b.v + d)));
+    });
+    return b;
+  });
+
+  const rank = b => blocks.filter(o => o.v === b.v && o.order < b.order).length;
+  const values = () => blocks.map(b => b.v).sort((p, q) => p - q);
+  const total = () => blocks.reduce((s, b) => s + b.v, 0);
+  const mean = () => total() / blocks.length;
+  const torque = () => blocks.reduce((s, b) => s + (b.v - pivot), 0);
+
+  function moveBlock(b, v) {
+    if (v === b.v) return;
+    b.v = v;
+    b.order = ++orderCtr;
+    eventMsg = '';
+    resetCubes();
+    update();
+  }
+
+  /* ---------- dragging ---------- */
+  function localX(e) {
+    const p = stage.createSVGPoint();
+    p.x = e.clientX; p.y = e.clientY;
+    return p.matrixTransform(beam.getScreenCTM().inverse()).x;
+  }
+  function startDrag(e, b) {
+    e.preventDefault();
+    stage.setPointerCapture(e.pointerId);
+    beam.appendChild(b.g);
+    b.g.focus({ preventScroll: true });
+    b.g.classList.add('dragging');
+    dragging = { b, off: b.x - localX(e), x: b.x, id: e.pointerId };
+    kick();
+  }
+  stage.addEventListener('pointermove', e => {
+    if (!dragging || e.pointerId !== dragging.id) return;
+    const lx = Math.max(beamL() + blockW / 2, Math.min(beamR() - blockW / 2, localX(e) + dragging.off));
+    dragging.x = lx;
+    const v = Math.max(MIN, Math.min(MAX, Math.round((lx - pad) / unit - 0.5 + MIN)));
+    moveBlock(dragging.b, v);
+    kick();
+  });
+  function endDrag(e) {
+    if (!dragging || e.pointerId !== dragging.id) return;
+    dragging.b.g.classList.remove('dragging');
+    dragging = null;
+    kick();
+  }
+  stage.addEventListener('pointerup', endDrag);
+  stage.addEventListener('pointercancel', endDrag);
+
+  /* ---------- drawing ---------- */
+  function layout() {
+    W = stage.parentNode.clientWidth;
+    if (!W) return;
+    pad = W < 480 ? 8 : 16;
+    unit = (W - 2 * pad) / (MAX - MIN + 1);
+    blockW = Math.min(unit - 4, 58);
+    stage.setAttribute('viewBox', `0 0 ${W} ${STAGE_H}`);
+    stage.setAttribute('height', STAGE_H);
+    beamBar.setAttribute('x', beamL());
+    beamBar.setAttribute('y', BEAM_Y - BEAM_T / 2);
+    beamBar.setAttribute('width', beamR() - beamL());
+    beamBar.setAttribute('height', BEAM_T);
+    beamNums.forEach((t, i) => t.setAttribute('x', xOf(MIN + i)));
+    const gy = BEAM_Y + BEAM_T / 2 + PIVOT_H;
+    groundLine.setAttribute('x1', 0); groundLine.setAttribute('x2', W);
+    groundLine.setAttribute('y1', gy); groundLine.setAttribute('y2', gy);
+    blocks.forEach(b => {
+      b.rect.setAttribute('x', -blockW / 2);
+      b.rect.setAttribute('width', blockW);
+      b.x = dragging && dragging.b === b ? b.x : xOf(b.v);
+    });
+    draw();
+    drawCubes();
+    updateMeanMark();
+  }
+
+  function draw() {
+    const py = BEAM_Y + BEAM_T / 2, gy = py + PIVOT_H, px = xOf(pivotShown);
+    beam.setAttribute('transform', `rotate(${angle} ${px} ${py})`);
+    pivotTri.setAttribute('points', `${px},${py} ${px - 30},${gy} ${px + 30},${gy}`);
+    pivotNum.setAttribute('x', px);
+    pivotNum.setAttribute('y', gy - 7);
+    pivotNum.textContent = fmt(pivot);
+    const top = BEAM_Y - BEAM_T / 2;
+    blocks.forEach(b => {
+      b.g.setAttribute('transform', `translate(${b.x} ${top - (b.lv + 1) * BLOCK_H})`);
+    });
+  }
+
+  function targetAngle() {
+    const net = torque();
+    if (Math.abs(net) < EPS) return 0;
+    const arm = Math.max(xOf(pivotShown) - beamL(), beamR() - xOf(pivotShown));
+    const max = Math.asin(Math.min(1, PIVOT_H / arm)) * 180 / Math.PI * 0.98;
+    return max * Math.tanh(net / 3);
+  }
+
+  function step(dt) {
+    const a = 1 - Math.exp(-dt * 11);
+    pivotShown += (pivot - pivotShown) * a;
+    if (Math.abs(pivot - pivotShown) < 0.002) pivotShown = pivot;
+    blocks.forEach(b => {
+      const held = dragging && dragging.b === b;
+      const tx = held ? dragging.x : xOf(b.v);
+      const tl = rank(b) + (held ? 0.25 : 0);
+      b.x = held ? tx : b.x + (tx - b.x) * a;
+      b.lv += (tl - b.lv) * a;
+      if (Math.abs(tx - b.x) < 0.2) b.x = tx;
+      if (Math.abs(tl - b.lv) < 0.005) b.lv = tl;
+    });
+    const t = targetAngle();
+    angVel += (t - angle) * 60 * dt;
+    angVel *= Math.exp(-9 * dt);
+    angle += angVel * dt;
+    if (Math.abs(t - angle) < 0.01 && Math.abs(angVel) < 0.02) { angle = t; angVel = 0; }
+  }
+  function settled() {
+    return !dragging && angVel === 0 && angle === targetAngle() && pivotShown === pivot &&
+      blocks.every(b => b.x === xOf(b.v) && b.lv === rank(b));
+  }
+  function snap() {
+    pivotShown = pivot; angle = targetAngle(); angVel = 0;
+    blocks.forEach(b => {
+      const held = dragging && dragging.b === b;
+      b.x = held ? dragging.x : xOf(b.v);
+      b.lv = rank(b);
+    });
+  }
+  function frame(t) {
+    const dt = Math.min(0.05, (t - last) / 1000 || 0.016);
+    last = t;
+    if (reduce) snap(); else step(dt);
+    draw();
+    raf = settled() || (reduce && !dragging) ? 0 : requestAnimationFrame(frame);
+  }
+  function kick() {
+    if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
+  }
+
+  /* ---------- readouts ---------- */
+  function sumText(ds) {
+    if (!ds.length) return '0';
+    const s = ds.reduce((a, d) => a + d, 0);
+    return ds.length === 1 ? fmt(s) : ds.map(fmt).join(' + ') + ' = ' + fmt(s);
+  }
+  function updateMeanMark() {
+    const m = mean(), show = Math.abs(m - pivot) > EPS;
+    const gy = BEAM_Y + BEAM_T / 2 + PIVOT_H, x = xOf(m);
+    meanTick.style.display = meanText.style.display = show ? '' : 'none';
+    meanTick.setAttribute('x1', x); meanTick.setAttribute('x2', x);
+    meanTick.setAttribute('y1', gy); meanTick.setAttribute('y2', gy + 7);
+    meanText.setAttribute('x', Math.max(44, Math.min(W - 44, x)));
+    meanText.setAttribute('y', gy + 21);
+    meanText.textContent = 'mean ' + fmt(m);
+  }
+  function update() {
+    const vals = values(), m = mean(), sum = total(), net = torque();
+    const level = Math.abs(net) < EPS;
+    const rows = blocks.map(b => b.v).sort((p, q) => p - q);
+    const left = rows.filter(v => v < pivot - EPS).map(v => pivot - v);
+    const right = rows.filter(v => v > pivot + EPS).map(v => v - pivot);
+
+    blocks.forEach(b => {
+      const d = b.v - pivot, label = signed(d);
+      b.g.setAttribute('class', 'block ' + (d < -EPS ? 'below' : d > EPS ? 'above' : 'zero') + (dragging && dragging.b === b ? ' dragging' : ''));
+      b.text.textContent = label;
+      b.text.setAttribute('font-size', label.length > 3 ? 12 : 16);
+      b.g.setAttribute('aria-valuenow', b.v);
+      b.g.setAttribute('aria-valuetext', `${b.v}, ${label} from the pivot`);
+      b.g.setAttribute('aria-label', 'Block on ' + b.v);
+    });
+
+    $('left-sum').textContent = sumText(left);
+    $('right-sum').textContent = sumText(right);
+    $('compare').textContent = level ? '=' : net > 0 ? '<' : '>';
+    $('eq-sum').textContent = vals.join(' + ') + ' = ' + sum;
+    $('eq-mean').textContent = `${sum} ÷ ${vals.length} ${eqSign(m)} ${fmt(m)}`;
+
+    $('list-a').setAttribute('aria-pressed', sameList(vals, LISTS.a));
+    $('list-b').setAttribute('aria-pressed', sameList(vals, LISTS.b));
+    $('slide-pivot').hidden = Math.abs(m - pivot) < EPS;
+
+    let msg;
+    if (eventMsg) msg = eventMsg;
+    else if (level && pivot === 16) {
+      msg = `Level. The distances on the left add up to ${fmt(left.reduce((a, d) => a + d, 0))}, and so do the distances on the right. They cancel out, so the mean is 16.`;
+    } else if (level) {
+      msg = `Level again. The pivot now sits at ${fmt(pivot)}, which is the mean of this list. The balance point and the mean are the same number.`;
+    } else {
+      const dir = net > 0 ? 'right' : 'left';
+      msg = `It tips ${dir}. The ${dir} side has more total distance, so the pivot is no longer at the mean. The mean of this list is ${fmt(m)}. Move another block to level it, or slide the pivot.`;
+    }
+    $('status').textContent = msg;
+    updateMeanMark();
+    draw();
+    kick();
+  }
+
+  function setList(name) {
+    const target = LISTS[name], before = values();
+    const other = name === 'a' ? LISTS.b : LISTS.a;
+    const swapped = sameList(before, other);
+    if (!sameList(before, target)) {
+      const sorted = [...blocks].sort((p, q) =>
+        p.v - q.v || (p.v < 16 ? rank(q) - rank(p) : rank(p) - rank(q)));
+      sorted.forEach((b, i) => {
+        if (b.v !== target[i]) { b.v = target[i]; b.order = ++orderCtr; }
+      });
+      resetCubes();
+    }
+    pivot = 16;
+    eventMsg = swapped
+      ? 'Two blocks moved 1 step in opposite directions, so the beam never tipped. The mean is still 16.'
+      : '';
+    update();
+  }
+  $('list-a').addEventListener('click', () => setList('a'));
+  $('list-b').addEventListener('click', () => setList('b'));
+  $('slide-pivot').addEventListener('click', () => { pivot = mean(); eventMsg = ''; update(); });
+
+  /* ---------- cubes ---------- */
+  const STEP = 13, CUBE_H = 11, CUBE_MAX = 20, CUBES_H = STEP * CUBE_MAX + 40;
+  const cube = { cols: [], moves: 0, busy: false, token: 0, msg: '' };
+  const cubeBase = () => CUBES_H - 28;
+  const GUTTER = 44;
+
+  function colGeom() {
+    const w = cubesSvg.parentNode.clientWidth;
+    const colStep = (w - GUTTER - 6) / cube.cols.length;
+    const colW = Math.min(70, colStep - 8);
+    return { w, colW, x: i => GUTTER + i * colStep + (colStep - colW) / 2, cx: i => GUTTER + (i + 0.5) * colStep };
+  }
+  function resetCubes() {
+    cube.cols = values();
+    cube.moves = 0;
+    cube.busy = false;
+    cube.token++;
+    cube.msg = 'Move the cubes one at a time and watch the stacks even out.';
+    drawCubes();
+  }
+  function nextMove() {
+    const h = cube.cols;
+    let src = 0, dst = 0;
+    h.forEach((v, i) => { if (v > h[src] || (v === h[src] && i > src)) src = i; if (v < h[dst]) dst = i; });
+    return h[src] - h[dst] >= 2 ? { src, dst } : null;
+  }
+  function drawCubes() {
+    if (!cube.cols.length) return;
+    const g = colGeom();
+    if (!g.w) return;
+    cubesSvg.setAttribute('viewBox', `0 0 ${g.w} ${CUBES_H}`);
+    cubesSvg.setAttribute('height', CUBES_H);
+    while (cubesSvg.firstChild) cubesSvg.removeChild(cubesSvg.firstChild);
+    const m = cube.cols.reduce((a, v) => a + v, 0) / cube.cols.length;
+    const whole = Math.floor(m + EPS), base = cubeBase();
+    cube.cols.forEach((h, i) => {
+      const x = g.x(i);
+      for (let c = 1; c <= Math.max(h, whole); c++) {
+        const y = base - c * STEP;
+        const cls = c > h ? 'cube-hole' : c > whole ? 'cube-extra' : 'cube-mid';
+        svgEl('rect', { class: cls, x, y, width: g.colW, height: CUBE_H, rx: 2 }, cubesSvg);
+      }
+      svgEl('text', { class: 'col-num', x: g.cx(i), y: base + 18 }, cubesSvg).textContent = h;
+    });
+    const ly = base - m * STEP - (STEP - CUBE_H) / 2;
+    svgEl('line', { class: 'mean-line', x1: GUTTER - 2, x2: g.w - 6, y1: ly, y2: ly }, cubesSvg);
+    svgEl('text', { class: 'gutter-text', x: 6, y: ly - 3 }, cubesSvg).textContent = 'mean';
+    svgEl('text', { class: 'gutter-num', x: 6, y: ly + 15 }, cubesSvg).textContent = fmt(m);
+
+    const extra = cube.cols.reduce((a, v) => a + Math.max(0, v - m), 0);
+    const gaps = cube.cols.reduce((a, v) => a + Math.max(0, m - v), 0);
+    $('extra-count').textContent = fmt(extra);
+    $('gap-count').textContent = fmt(gaps);
+    $('cube-status').textContent = cube.msg;
+    $('move-cube').disabled = cube.busy || !nextMove();
+    $('put-back').disabled = cube.busy || !cube.moves;
+  }
+  function finishMove(mv) {
+    cube.cols[mv.dst]++;
+    cube.moves++;
+    cube.busy = false;
+    if (nextMove()) {
+      cube.msg = `Moved one cube from the stack of ${cube.cols[mv.src] + 1} to the stack of ${cube.cols[mv.dst] - 1}.`;
+    } else {
+      const sum = cube.cols.reduce((a, v) => a + v, 0), n = cube.cols.length;
+      cube.msg = sum % n === 0
+        ? `Every stack is now ${sum / n}. Nothing was added or taken away, only shared. That fair share is the mean.`
+        : `The stacks are as even as whole cubes can get. ${sum} cubes ÷ ${n} stacks ${eqSign(sum / n)} ${fmt(sum / n)} each, and that fair share is the mean.`;
+    }
+    drawCubes();
+  }
+  $('move-cube').addEventListener('click', () => {
+    const mv = !cube.busy && nextMove();
+    if (!mv) return;
+    const fromTop = cube.cols[mv.src], toTop = cube.cols[mv.dst] + 1;
+    cube.cols[mv.src]--;
+    cube.busy = true;
+    cube.msg = '';
+    drawCubes();
+    if (reduce) { finishMove(mv); return; }
+    const g = colGeom(), base = cubeBase(), token = cube.token;
+    const x0 = g.x(mv.src), y0 = base - fromTop * STEP, x1 = g.x(mv.dst), y1 = base - toTop * STEP;
+    const fly = svgEl('rect', { class: 'cube-extra', x: x0, y: y0, width: g.colW, height: CUBE_H, rx: 2 }, cubesSvg);
+    const start = performance.now(), dur = 650;
+    (function tick(t) {
+      if (token !== cube.token) return;
+      const p = Math.min(1, (t - start) / dur), e = p * p * (3 - 2 * p);
+      fly.setAttribute('x', x0 + (x1 - x0) * e);
+      fly.setAttribute('y', y0 + (y1 - y0) * e - Math.sin(Math.PI * e) * 34);
+      if (p < 1) requestAnimationFrame(tick); else finishMove(mv);
+    })(start);
+  });
+  $('put-back').addEventListener('click', resetCubes);
+
+  /* ---------- start ---------- */
+  layout();
+  blocks.forEach(b => { b.lv = rank(b); });
+  resetCubes();
+  update();
+  snap();
+  draw();
+  if (window.ResizeObserver) {
+    let lastW = 0;
+    new ResizeObserver(() => {
+      const w = stage.parentNode.clientWidth;
+      if (w !== lastW) { lastW = w; layout(); snap(); draw(); }
+    }).observe(stage.parentNode);
+  }
+})();
+</script>

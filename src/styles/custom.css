@@ -1,12 +1,211 @@
+/*
+ * Foundations of CSE: theme and readability.
+ *
+ * Goals: body text at least 7:1 contrast in both themes, a font designed for
+ * legibility, 17px body text with a 1.7 line height, and lines of about 70
+ * characters.
+ */
+
+/* ---------- Dark theme (Starlight default, retuned) ---------- */
+:root {
+	--sl-font: 'Atkinson Hyperlegible Next Variable';
+	--sl-font-mono: 'JetBrains Mono Variable';
+
+	--sl-color-accent-low: #1c2550;
+	--sl-color-accent: #6b8cff;
+	--sl-color-accent-high: #c5d0ff;
+
+	--sl-color-white: #f5f7fb; /* headings */
+	--sl-color-gray-1: #e3e7ef;
+	--sl-color-gray-2: #cdd3de; /* body text, 12:1 on the page background */
+	--sl-color-gray-3: #9aa3b4; /* secondary text, 6.8:1 */
+	--sl-color-gray-4: #6b7385;
+	--sl-color-gray-5: #3a4150;
+	--sl-color-gray-6: #1d222c;
+	--sl-color-black: #13161d;
+
+	--sl-text-body: 1.0625rem;
+	--sl-text-body-sm: 0.9375rem;
+	--sl-line-height: 1.7;
+	--sl-content-width: 46rem;
+
+	/* Shared tokens for diagrams, callouts and simulations. */
+	--cse-surface: #191d26;
+	--cse-surface-2: #20252f;
+	--cse-border: #353c4a;
+	--cse-teal: #3fd0ca;
+	--cse-teal-soft: rgba(63, 208, 202, 0.13);
+	--cse-red: #ff7a8a;
+	--cse-red-soft: rgba(255, 122, 138, 0.14);
+	--cse-amber: #ffb35c;
+	--cse-amber-soft: rgba(255, 179, 92, 0.14);
+}
+
+/* ---------- Light ("white") theme ---------- */
+:root[data-theme='light'] {
+	--sl-color-accent-low: #e4e9ff;
+	--sl-color-accent: #3451d1;
+	--sl-color-accent-high: #1d348f; /* links, 10:1 on white */
+
+	--sl-color-white: #0f1420; /* headings */
+	--sl-color-gray-1: #1d2433;
+	--sl-color-gray-2: #2f3747; /* body text, 11.6:1 on white */
+	--sl-color-gray-3: #4a5365; /* secondary text, 7.6:1 */
+	--sl-color-gray-4: #6a7284;
+	--sl-color-gray-5: #d3d8e2;
+	--sl-color-gray-6: #e8ebf1;
+	--sl-color-gray-7: #f5f7fa;
+	--sl-color-black: #ffffff;
+
+	--sl-color-bg-nav: #ffffff;
+	--sl-color-bg-sidebar: #f8f9fb;
+	--sl-color-hairline: #e3e7ee;
+	--sl-color-hairline-light: #d3d8e2;
+	--sl-color-bg-inline-code: #eef1f6;
+
+	--cse-surface: #ffffff;
+	--cse-surface-2: #f5f7fa;
+	--cse-border: #d3d8e2;
+	--cse-teal: #0a6b68;
+	--cse-teal-soft: rgba(10, 107, 104, 0.09);
+	--cse-red: #b42840;
+	--cse-red-soft: rgba(180, 40, 64, 0.08);
+	--cse-amber: #9a4d00;
+	--cse-amber-soft: rgba(154, 77, 0, 0.09);
+}
+
+/* ---------- Typography ---------- */
+body {
+	font-feature-settings: 'kern', 'liga';
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+}
+
+.sl-markdown-content {
+	font-size: var(--sl-text-body);
+}
+
+.sl-markdown-content :is(h2, h3, h4) {
+	letter-spacing: -0.01em;
+	font-weight: 700;
+	text-wrap: balance;
+}
+
+.sl-markdown-content h2 {
+	padding-top: 0.5rem;
+	border-top: 1px solid var(--sl-color-hairline);
+	margin-top: 2.5rem;
+}
+
+.sl-markdown-content :is(p, li) {
+	text-wrap: pretty;
+}
+
+.sl-markdown-content strong {
+	color: var(--sl-color-white);
+	font-weight: 700;
+}
+
+/* Links: always underlined, with enough offset not to clip descenders. */
+.sl-markdown-content a:not(.not-content *) {
+	text-underline-offset: 0.18em;
+	text-decoration-thickness: 1px;
+}
+.sl-markdown-content a:not(.not-content *):hover {
+	text-decoration-thickness: 2px;
+}
+
+/* Inline code: slightly smaller so it does not overpower the prose. */
+.sl-markdown-content :not(pre) > code {
+	font-size: 0.88em;
+	padding: 0.1em 0.35em;
+	border-radius: 0.3em;
+}
+
+/* Visible keyboard focus everywhere. */
+:focus-visible {
+	outline: 3px solid var(--sl-color-accent);
+	outline-offset: 2px;
+}
+
+/* ---------- Tables ---------- */
+.sl-markdown-content table {
+	font-size: 0.95em;
+	display: block;
+	overflow-x: auto;
+}
+.sl-markdown-content :is(th, td) {
+	padding: 0.55rem 0.8rem;
+	vertical-align: top;
+}
+.sl-markdown-content th {
+	background: var(--sl-color-gray-6);
+	color: var(--sl-color-white);
+	font-weight: 700;
+}
+:root[data-theme='light'] .sl-markdown-content th {
+	background: var(--sl-color-gray-7);
+}
+.sl-markdown-content tbody tr:nth-child(even) {
+	background: color-mix(in srgb, var(--sl-color-gray-6) 45%, transparent);
+}
+:root[data-theme='light'] .sl-markdown-content tbody tr:nth-child(even) {
+	background: var(--sl-color-gray-7);
+}
+
+/* ---------- Math ---------- */
 /* Long equations scroll sideways instead of breaking the layout on phones. */
 .katex-display {
 	overflow-x: auto;
 	overflow-y: hidden;
-	padding-block: 0.25rem;
+	padding-block: 0.35rem;
+}
+.katex {
+	font-size: 1.08em;
 }
 
-/* Topic checklists on course overview pages. */
+/* ---------- Topic checklists on course overview pages ---------- */
 .sl-markdown-content ul.contains-task-list {
 	list-style: none;
 	padding-inline-start: 0.25rem;
+}
+.sl-markdown-content .task-list-item input[type='checkbox'] {
+	width: 1.05em;
+	height: 1.05em;
+	margin-inline-end: 0.5em;
+	vertical-align: -0.12em;
+	accent-color: var(--sl-color-accent);
+}
+
+/* ---------- Diagrams in notes ---------- */
+.sl-markdown-content figure.diagram {
+	margin-block: 1.5rem;
+	padding: 1rem;
+	background: var(--cse-surface-2);
+	border: 1px solid var(--cse-border);
+	border-radius: 0.6rem;
+	overflow-x: auto;
+}
+.sl-markdown-content figure.diagram svg {
+	display: block;
+	margin-inline: auto;
+	max-width: 100%;
+	height: auto;
+}
+.sl-markdown-content figure.diagram figcaption {
+	margin-top: 0.6rem;
+	font-size: var(--sl-text-body-sm);
+	color: var(--sl-color-gray-3);
+	text-align: center;
+}
+
+/* Respect reduced-motion preferences site-wide. */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
 }

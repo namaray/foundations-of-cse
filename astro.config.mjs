@@ -37,7 +37,15 @@ export default defineConfig({
 			social: [{ icon: 'github', label: 'GitHub', href: REPO }],
 			editLink: { baseUrl: `${REPO}/edit/main/` },
 			lastUpdated: true,
-			customCss: ['katex/dist/katex.min.css', './src/styles/custom.css'],
+			customCss: [
+				'@fontsource-variable/atkinson-hyperlegible-next',
+				'@fontsource-variable/jetbrains-mono',
+				'katex/dist/katex.min.css',
+				'./src/styles/custom.css',
+			],
+			components: {
+				ThemeProvider: './src/components/ThemeProvider.astro',
+			},
 			sidebar,
 		}),
 	],
