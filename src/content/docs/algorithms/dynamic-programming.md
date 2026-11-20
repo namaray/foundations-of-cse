@@ -6,8 +6,6 @@ sidebar:
   order: 6
 lesson:
   module: Design paradigms
-  minutes: 60
-  priority: high
 ---
 
 **Dynamic programming (DP)** solves a problem by breaking it into subproblems, solving each subproblem **once**, and storing the answer so it is never recomputed.

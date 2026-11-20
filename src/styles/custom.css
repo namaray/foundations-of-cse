@@ -199,6 +199,140 @@ body {
 	text-align: center;
 }
 
+/* ---------- Diagram vocabulary (inline SVG in lessons) ----------
+ * Shapes use semantic classes so every diagram follows the theme:
+ *   dg-cell        plain box            dg-cell-dim   not yet processed
+ *   dg-cell-a      accent (blue) group  dg-cell-b     highlight (amber): key, pivot
+ *   dg-cell-c      done / sorted (teal)
+ * Text: dg-t (normal), dg-t-muted, dg-t-a / dg-t-b / dg-t-c (on matching cells).
+ * Lines: dg-line, dg-line-a, dg-line-b; arrowheads use dg-head(-a/-b).
+ */
+figure.diagram svg.dg {
+	font-family: var(--__sl-font);
+	min-width: var(--dg-min, 0);
+}
+.dg text {
+	fill: var(--sl-color-gray-1);
+	font-size: 15px;
+	dominant-baseline: central;
+}
+.dg .dg-t-muted {
+	fill: var(--sl-color-gray-3);
+	font-size: 13px;
+}
+.dg .dg-t-strong {
+	fill: var(--sl-color-white);
+	font-weight: 700;
+}
+.dg .dg-t-a {
+	fill: var(--sl-color-text-accent);
+	font-weight: 700;
+}
+.dg .dg-t-b {
+	fill: var(--cse-amber);
+	font-weight: 700;
+}
+.dg .dg-t-c {
+	fill: var(--cse-teal);
+	font-weight: 700;
+}
+.dg .dg-cell {
+	fill: var(--cse-surface);
+	stroke: var(--sl-color-gray-4);
+	stroke-width: 1.5;
+}
+.dg .dg-cell-dim {
+	fill: var(--cse-surface-2);
+	stroke: var(--sl-color-gray-4);
+	stroke-width: 1.5;
+	stroke-dasharray: 4 3;
+}
+.dg .dg-cell-a {
+	fill: color-mix(in srgb, var(--sl-color-accent) 14%, var(--cse-surface));
+	stroke: var(--sl-color-accent);
+	stroke-width: 1.5;
+}
+.dg .dg-cell-b {
+	fill: color-mix(in srgb, var(--cse-amber) 16%, var(--cse-surface));
+	stroke: var(--cse-amber);
+	stroke-width: 2;
+}
+.dg .dg-cell-c {
+	fill: color-mix(in srgb, var(--cse-teal) 14%, var(--cse-surface));
+	stroke: var(--cse-teal);
+	stroke-width: 1.5;
+}
+.dg .dg-line {
+	stroke: var(--sl-color-gray-3);
+	stroke-width: 1.5;
+	fill: none;
+}
+.dg .dg-line-a {
+	stroke: var(--sl-color-accent);
+	stroke-width: 2;
+	fill: none;
+}
+.dg .dg-line-b {
+	stroke: var(--cse-amber);
+	stroke-width: 2;
+	fill: none;
+}
+.dg .dg-head {
+	fill: var(--sl-color-gray-3);
+}
+.dg .dg-head-a {
+	fill: var(--sl-color-accent);
+}
+.dg .dg-head-b {
+	fill: var(--cse-amber);
+}
+
+/* Legend under a diagram. */
+.sl-markdown-content .dg-legend {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.4rem 1.1rem;
+	margin: 0.6rem 0 0;
+	padding: 0;
+	list-style: none;
+	font-size: var(--sl-text-body-sm);
+	color: var(--sl-color-gray-2);
+}
+.sl-markdown-content .dg-legend li {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin: 0;
+}
+.dg-swatch {
+	width: 0.95rem;
+	height: 0.95rem;
+	border-radius: 0.2rem;
+	border: 2px solid;
+	display: inline-block;
+}
+.dg-swatch.a {
+	border-color: var(--sl-color-accent);
+	background: color-mix(in srgb, var(--sl-color-accent) 14%, var(--cse-surface));
+}
+.dg-swatch.b {
+	border-color: var(--cse-amber);
+	background: color-mix(in srgb, var(--cse-amber) 16%, var(--cse-surface));
+}
+.dg-swatch.c {
+	border-color: var(--cse-teal);
+	background: color-mix(in srgb, var(--cse-teal) 14%, var(--cse-surface));
+}
+.dg-swatch.plain {
+	border-color: var(--sl-color-gray-4);
+	background: var(--cse-surface);
+}
+.dg-swatch.dim {
+	border: 2px dashed var(--sl-color-gray-4);
+	background: var(--cse-surface-2);
+}
+
 /* ---------- "Go deeper" boxes: optional extra detail in lessons ---------- */
 .sl-markdown-content details.go-deeper {
 	border: 1px dashed var(--sl-color-gray-4);

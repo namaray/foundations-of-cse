@@ -6,8 +6,6 @@ sidebar:
   order: 7
 lesson:
   module: Graph algorithms
-  minutes: 40
-  priority: high
 ---
 
 Graph representations and the basic BFS and DFS procedures are introduced in [Data Structures: Graphs](/data-structures/graphs/). This page covers what the traversals are used **for**. All the algorithms here run in $O(V + E)$ with an adjacency list.

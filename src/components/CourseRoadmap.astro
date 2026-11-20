@@ -1,6 +1,6 @@
 ---
-// The study path for one course: lessons grouped into modules, with time,
-// exam priority and progress saved in this browser.
+// The study path for one course: lessons grouped into modules, with
+// progress saved in this browser.
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -26,14 +26,12 @@ for (const l of lessons) {
 	else modules.push({ name: l.module, items: [l] });
 }
 
-const totalMinutes = lessons.reduce((s, l) => s + l.minutes, 0);
-const hours = Math.round(totalMinutes / 30) / 2; // nearest half hour
 ---
 
 <div class="roadmap not-content" data-lessons={JSON.stringify(lessons.map((l) => ({ id: l.id, title: l.title, href: l.href })))}>
 	<div class="roadmap-head">
 		<p class="roadmap-stats">
-			{lessons.length} lessons · about {hours} hours
+			{lessons.length} lessons in {modules.length} modules
 		</p>
 		<div class="roadmap-bar" role="progressbar" aria-label="Lessons done" aria-valuemin="0" aria-valuemax={lessons.length} aria-valuenow="0">
 			<span class="roadmap-fill"></span>
@@ -57,10 +55,6 @@ const hours = Math.round(totalMinutes / 30) / 2; // nearest half hour
 							<a href={l.href}>
 								<span class="roadmap-n">{l.n}.</span> {l.title}
 							</a>
-							<span class="roadmap-meta">
-								{l.priority === 'high' && <span class="roadmap-high">High priority</span>}
-								<span class="roadmap-min">{l.minutes} min</span>
-							</span>
 							<span class="sr-only roadmap-sr" />
 						</li>
 					))}
@@ -174,7 +168,7 @@ const hours = Math.round(totalMinutes / 30) / 2; // nearest half hour
 	}
 	.roadmap-item {
 		display: grid;
-		grid-template-columns: 1.4rem minmax(0, 1fr) auto;
+		grid-template-columns: 1.4rem minmax(0, 1fr);
 		align-items: center;
 		gap: 0.75rem;
 		padding: 0.7rem 0.25rem;
@@ -203,21 +197,6 @@ const hours = Math.round(totalMinutes / 30) / 2; // nearest half hour
 		color: var(--sl-color-gray-3);
 		font-weight: 400;
 	}
-	.roadmap-meta {
-		display: flex;
-		gap: 0.5rem;
-		align-items: center;
-		font-size: var(--sl-text-sm);
-		color: var(--sl-color-gray-3);
-		white-space: nowrap;
-	}
-	.roadmap-high {
-		padding: 0.1rem 0.5rem;
-		border-radius: 999px;
-		color: var(--cse-amber);
-		background: var(--cse-amber-soft);
-		font-weight: 700;
-	}
 	.is-done .roadmap-check {
 		border-color: var(--cse-teal);
 		background: var(--cse-teal);
@@ -234,14 +213,5 @@ const hours = Math.round(totalMinutes / 30) / 2; // nearest half hour
 	}
 	.is-next .roadmap-check {
 		border-color: var(--sl-color-accent);
-	}
-	@media (max-width: 30rem) {
-		.roadmap-item {
-			grid-template-columns: 1.4rem minmax(0, 1fr);
-			row-gap: 0.2rem;
-		}
-		.roadmap-meta {
-			grid-column: 2;
-		}
 	}
 </style>

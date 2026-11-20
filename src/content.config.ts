@@ -5,7 +5,7 @@ import { docsSchema } from '@astrojs/starlight/schema';
 
 /**
  * Optional lesson metadata. When a page has `lesson:` in its frontmatter it
- * gets the lesson header (time, priority, prerequisites, outcomes, key idea)
+ * gets the lesson header (prerequisites, outcomes, key idea)
  * and the lesson footer (mark as done, previous/next), and it appears on its
  * course's study path.
  *
@@ -14,10 +14,6 @@ import { docsSchema } from '@astrojs/starlight/schema';
 const lesson = z.object({
 	/** Module heading on the course study path, e.g. "Foundations". */
 	module: z.string(),
-	/** Rough reading-and-practice time in minutes. */
-	minutes: z.number().int().positive(),
-	/** How often the topic comes up in vivas and admission tests. */
-	priority: z.enum(['high', 'medium', 'low']).optional(),
 	/** Lessons to read first. */
 	prerequisites: z.array(z.object({ label: z.string(), link: z.string() })).optional(),
 	/** "By the end you can…" outcomes, 3–5 short phrases. */

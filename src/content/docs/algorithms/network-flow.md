@@ -6,8 +6,6 @@ sidebar:
   order: 10
 lesson:
   module: Graph algorithms
-  minutes: 30
-  priority: low
 ---
 
 A **flow network** is a directed graph where each edge $(u, v)$ has a **capacity** $c(u, v) \ge 0$, with a **source** $s$ and a **sink** $t$. Think of water pipes, road traffic or network bandwidth. The **maximum flow** problem asks how much can be sent from $s$ to $t$.

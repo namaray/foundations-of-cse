@@ -6,8 +6,6 @@ sidebar:
   order: 12
 lesson:
   module: Further topics
-  minutes: 30
-  priority: medium
 ---
 
 Some problems have no known fast algorithm, so we must search through possible solutions. **Backtracking** and **branch and bound** search systematically and **prune** branches that cannot lead to a (better) solution, which is often far faster than trying everything.

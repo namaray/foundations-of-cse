@@ -6,8 +6,6 @@ sidebar:
   order: 4
 lesson:
   module: Design paradigms
-  minutes: 35
-  priority: medium
 ---
 
 **Divide and conquer** solves a problem in three steps:

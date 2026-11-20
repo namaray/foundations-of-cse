@@ -9,7 +9,6 @@ sidebar:
     variant: note
 lesson:
   module: Revision
-  minutes: 15
 ---
 
 Use this page for last-minute revision. Every row links back to the full notes.

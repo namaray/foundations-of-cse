@@ -6,8 +6,6 @@ sidebar:
   order: 13
 lesson:
   module: Further topics
-  minutes: 45
-  priority: high
 ---
 
 Some problems have fast algorithms; for others, nobody has found one despite decades of effort. NP-completeness theory explains which problems are probably hard, and gives a way to prove that a new problem is at least as hard as the famous ones.

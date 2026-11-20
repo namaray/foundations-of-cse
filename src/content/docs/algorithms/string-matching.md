@@ -6,8 +6,6 @@ sidebar:
   order: 11
 lesson:
   module: Further topics
-  minutes: 35
-  priority: medium
 ---
 
 **Problem.** Find every position where a pattern $P$ of length $m$ occurs in a text $T$ of length $n$.

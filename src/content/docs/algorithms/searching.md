@@ -6,8 +6,6 @@ sidebar:
   order: 3
 lesson:
   module: Foundations
-  minutes: 25
-  priority: medium
 ---
 
 ## Linear search

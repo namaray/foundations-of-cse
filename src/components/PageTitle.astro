@@ -18,7 +18,6 @@ if (lesson) {
 	const n = lessons.findIndex((e) => e.id === id) + 1;
 	crumb = `${title} · Lesson ${n} of ${lessons.length}`;
 }
-const priorityLabel = { high: 'High', medium: 'Medium', low: 'Low' } as const;
 ---
 
 {lesson && <p class="lesson-crumb">{crumb}</p>}
@@ -26,27 +25,17 @@ const priorityLabel = { high: 'High', medium: 'Medium', low: 'Low' } as const;
 {
 	lesson && (
 		<section class="lesson-intro" aria-label="About this lesson">
-			<ul class="lesson-meta">
-				<li>
-					<span class="meta-label">Time</span> about {lesson.minutes} min
-				</li>
-				{lesson.priority && (
-					<li class={`priority priority-${lesson.priority}`}>
-						<span class="meta-label">Exam priority</span> {priorityLabel[lesson.priority]}
-					</li>
-				)}
-				{lesson.prerequisites && lesson.prerequisites.length > 0 && (
-					<li>
-						<span class="meta-label">Read first</span>{' '}
-						{lesson.prerequisites.map((p, i) => (
-							<>
-								{i > 0 && ', '}
-								<a href={p.link}>{p.label}</a>
-							</>
-						))}
-					</li>
-				)}
-			</ul>
+			{lesson.prerequisites && lesson.prerequisites.length > 0 && (
+				<p class="lesson-prereq">
+					<span class="meta-label">Read first:</span>{' '}
+					{lesson.prerequisites.map((p, i) => (
+						<>
+							{i > 0 && ', '}
+							<a href={p.link}>{p.label}</a>
+						</>
+					))}
+				</p>
+			)}
 
 			{lesson.outcomes && lesson.outcomes.length > 0 && (
 				<div class="lesson-outcomes">
@@ -80,38 +69,16 @@ const priorityLabel = { high: 'High', medium: 'Medium', low: 'Low' } as const;
 		display: grid;
 		gap: 1rem;
 	}
-	.lesson-meta {
-		list-style: none;
-		padding: 0;
+	.lesson-prereq {
 		margin: 0;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
 		font-size: var(--sl-text-sm);
-	}
-	.lesson-meta li {
-		padding: 0.3rem 0.7rem;
-		border: 1px solid var(--sl-color-hairline-light);
-		border-radius: 999px;
 		color: var(--sl-color-gray-2);
-		background: var(--cse-surface-2);
 	}
 	.meta-label {
 		color: var(--sl-color-gray-3);
-		margin-inline-end: 0.25rem;
 	}
-	.lesson-meta a {
+	.lesson-prereq a {
 		color: var(--sl-color-text-accent);
-	}
-	.priority-high {
-		border-color: var(--cse-amber) !important;
-		background: var(--cse-amber-soft) !important;
-		color: var(--cse-amber) !important;
-		font-weight: 700;
-	}
-	.priority-high .meta-label {
-		color: inherit;
-		font-weight: 400;
 	}
 	.lesson-box-title {
 		margin: 0 0 0.35rem;
