@@ -1,0 +1,19 @@
+---
+title: "Compiler Design"
+description: "How source code becomes machine code: lexing, parsing, translation and optimization."
+sidebar:
+  label: Overview
+  order: 0
+---
+
+import CourseRoadmap from '../../../components/CourseRoadmap.astro';
+
+A compiler translates a program in one language into another, usually machine code, without changing what it means. This course follows a program through each phase: scanning it into tokens, parsing it into a tree, checking it, turning it into intermediate code, improving that code, and finally generating machine instructions. It applies [Theory of Computation](/theory-of-computation/) directly: regular expressions drive the scanner and context-free grammars drive the parser.
+
+<CourseRoadmap course="compiler-design" />
+
+## Standard textbooks
+
+- Aho, Lam, Sethi & Ullman: *Compilers: Principles, Techniques, and Tools* (the "Dragon Book")
+- Keith Cooper & Linda Torczon: *Engineering a Compiler*
+- Andrew Appel: *Modern Compiler Implementation in C/Java/ML*
