@@ -1,0 +1,25 @@
+---
+title: "Database Systems"
+description: "Data modeling, SQL, normalization, indexing, transactions and recovery."
+sidebar:
+  label: Overview
+  order: 0
+---
+
+import CourseRoadmap from '../../../components/CourseRoadmap.astro';
+
+A database system stores data so that many users can query and update it correctly, quickly and safely, even when things crash. The course moves from design (ER diagrams, normalization) through querying (relational algebra, SQL) to the internals that make it all work (indexes, transactions, recovery).
+
+Most examples use one small university schema:
+
+- **Student**(<u>sid</u>, name, dept, cgpa)
+- **Course**(<u>cid</u>, title, credits, dept)
+- **Enrolled**(<u>sid</u>, <u>cid</u>, grade)
+
+<CourseRoadmap course="database-systems" />
+
+## Standard textbooks
+
+- Silberschatz, Korth & Sudarshan: *Database System Concepts*
+- Ramez Elmasri & Shamkant Navathe: *Fundamentals of Database Systems*
+- Raghu Ramakrishnan & Johannes Gehrke: *Database Management Systems*
