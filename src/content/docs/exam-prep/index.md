@@ -6,7 +6,18 @@ sidebar:
   order: 0
 ---
 
-Every course in the sidebar opens with an **Overview** page that lists the topics to master and the standard textbooks. Topic notes are added under each course as they are written.
+Every course in the sidebar opens with an **Overview** page: a short introduction, a **roadmap** of its lessons grouped into modules (with your progress), and the standard textbooks.
+
+Each lesson follows the same shape:
+
+- **Read first:** the lessons it builds on.
+- **You will be able to:** what you should be able to do afterwards.
+- **Key idea:** the whole lesson in a few sentences. If you only have a minute, read this.
+- Numbered sections, each with a worked example, and optional **Go deeper** boxes.
+- **Summary** and **Check yourself** questions (click to reveal the answer).
+- **Mark as done** at the bottom, which updates the course roadmap. Progress is saved in your browser only.
+
+Every course ends with a **cheat sheet** for last-minute revision, including the most common viva questions. Linear Algebra, Probability & Statistics, Calculus and Numerical Methods have overview pages only for now.
 
 ## A suggested revision order
 
@@ -15,6 +26,8 @@ Every course in the sidebar opens with an **Overview** page that lists the topic
 3. **Core systems:** Computer Architecture, Operating Systems, Computer Networks, Database Systems
 4. **Breadth:** Software Engineering, AI, Machine Learning, Compiler Design, Graphics, Security
 5. **Supporting maths:** Linear Algebra, Probability & Statistics, Numerical Methods
+
+A quick way to revise a course: read its cheat sheet, try each lesson's **Check yourself** questions, and open the full lesson only where you get stuck.
 
 ## Writing a topic note
 
