@@ -19,9 +19,9 @@ Use this page for last-minute revision. Every row links back to the full notes.
 
 | Algorithm | Best | Average | Worst | Space | Stable |
 |---|---|---|---|---|---|
-| [Insertion sort](/algorithms/sorting/#elementary-sorts) | $n$ | $n^2$ | $n^2$ | $1$ | Yes |
-| [Merge sort](/algorithms/sorting/#merge-sort) | $n \log n$ | $n \log n$ | $n \log n$ | $n$ | Yes |
-| [Quicksort](/algorithms/sorting/#quicksort) | $n \log n$ | $n \log n$ | $n^2$ | $\log n$ | No |
+| [Insertion sort](/algorithms/sorting/#1-insertion-sort-the-simple-baseline) | $n$ | $n^2$ | $n^2$ | $1$ | Yes |
+| [Merge sort](/algorithms/sorting/#2-merge-sort-always-n-log-n) | $n \log n$ | $n \log n$ | $n \log n$ | $n$ | Yes |
+| [Quicksort](/algorithms/sorting/#3-quicksort-fastest-in-practice) | $n \log n$ | $n \log n$ | $n^2$ | $\log n$ | No |
 | [Heapsort](/data-structures/heaps/#heapsort) | $n \log n$ | $n \log n$ | $n \log n$ | $1$ | No |
 | [Counting sort](/algorithms/sorting/#counting-sort) | $n + k$ | $n + k$ | $n + k$ | $n + k$ | Yes |
 | [Radix sort](/algorithms/sorting/#radix-sort) | $d(n + k)$ | $d(n + k)$ | $d(n + k)$ | $n + k$ | Yes |
