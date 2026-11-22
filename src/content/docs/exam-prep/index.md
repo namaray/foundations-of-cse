@@ -11,11 +11,11 @@ Every course in the sidebar opens with an **Overview** page: a short introductio
 Each lesson follows the same shape:
 
 - **Read first:** the lessons it builds on.
-- **You will be able to:** what you should be able to do afterwards.
+- **By the end of this lesson you can:** what you should be able to do afterwards.
 - **Key idea:** the whole lesson in a few sentences. If you only have a minute, read this.
 - Numbered sections, each with a worked example, and optional **Go deeper** boxes.
 - **Summary** and **Check yourself** questions (click to reveal the answer).
-- **Mark as done** at the bottom, which updates the course roadmap. Progress is saved in your browser only.
+- **Mark lesson as done** at the bottom, which updates the course roadmap. Progress is saved in your browser only.
 
 Every course ends with a **cheat sheet** for last-minute revision, including the most common viva questions. Linear Algebra, Probability & Statistics, Calculus and Numerical Methods have overview pages only for now.
 
