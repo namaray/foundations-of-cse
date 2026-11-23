@@ -2,12 +2,25 @@
 title: Hashing
 description: Hash functions, collision resolution by chaining and open addressing (linear probing, quadratic probing, double hashing), load factor and rehashing, with worked examples.
 sidebar:
+  label: "6. Hashing"
   order: 6
+lesson:
+  module: Hashing and trees
+  prerequisites:
+    - label: Linked lists
+      link: /data-structures/linked-lists/
+  outcomes:
+    - Compute hash values with the division, multiplication, mid-square and folding methods
+    - Resolve collisions with chaining, linear and quadratic probing, and double hashing
+    - Relate the load factor to the expected number of probes
+    - Explain tombstones and rehashing
+  keyIdea: >-
+    A hash function turns a key straight into a table index, so search, insert and delete take $O(1)$ **on average**. Collisions are unavoidable: **chaining** keeps a list per slot, while **open addressing** probes for another free slot. Performance depends on the **load factor** $\alpha = n/m$, so tables are resized before they get too full.
 ---
 
 **Hashing** maps a key directly to a position in a table using a **hash function** $h(k)$. Search, insert and delete then take **$O(1)$ on average**, far faster than the $O(\log n)$ of a balanced tree.
 
-## Hash functions
+## 1. Hash functions
 
 A good hash function is fast to compute and spreads keys **uniformly** over the table, $0 \dots m-1$.
 
@@ -22,7 +35,7 @@ A good hash function is fast to compute and spreads keys **uniformly** over the 
 
 **Example (folding).** $k = 123456789$ split into `123 | 456 | 789`: $123 + 456 + 789 = 1368$, then reduce modulo $m$.
 
-## Collisions
+## 2. Collisions
 
 A **collision** happens when two keys hash to the same slot: $h(k_1) = h(k_2)$. By the pigeonhole principle collisions are unavoidable once there are more possible keys than slots, so every hash table needs a collision strategy.
 
@@ -32,28 +45,18 @@ $$
 \alpha = \frac{n}{m} = \frac{\text{number of keys}}{\text{number of slots}}
 $$
 
-## Separate chaining
+## 3. Separate chaining
 
 Each slot holds a **linked list** of all keys that hash there.
 
-```text
-h(k) = k mod 7, keys 50, 700, 76, 85, 92, 73, 101
-
-0 → 700
-1 → 50 → 85 → 92
-2
-3 → 73 → 101
-4
-5
-6 → 76
-```
+<figure class="diagram"><svg style="--dg-min:440px" class="dg" viewBox="0 0 440 300" role="img" aria-labelledby="chain-t"><title id="chain-t">Separate chaining with h(k) = k mod 7: slot 1 holds 50, 85, 92; slot 3 holds 73, 101; slots 0 and 6 hold 700 and 76.</title><defs><marker id="ah-chain" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-chain-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-a" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-chain-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-b" d="M0,0 L10,5 L0,10 z"/></marker></defs><line class="dg-line" x1="60" y1="29" x2="94" y2="29" marker-end="url(#ah-chain)"/><line class="dg-line" x1="60" y1="69" x2="94" y2="69" marker-end="url(#ah-chain)"/><line class="dg-line" x1="152" y1="69" x2="186" y2="69" marker-end="url(#ah-chain)"/><line class="dg-line" x1="244" y1="69" x2="278" y2="69" marker-end="url(#ah-chain)"/><line class="dg-line" x1="60" y1="149" x2="94" y2="149" marker-end="url(#ah-chain)"/><line class="dg-line" x1="152" y1="149" x2="186" y2="149" marker-end="url(#ah-chain)"/><line class="dg-line" x1="60" y1="269" x2="94" y2="269" marker-end="url(#ah-chain)"/><rect class="dg-cell-c" x="20" y="12" width="40" height="34" rx="3"/><text class="dg-t-c" x="40" y="29" text-anchor="middle">0</text><rect class="dg-cell" x="96" y="12" width="56" height="34" rx="4"/><text x="124" y="29" text-anchor="middle">700</text><rect class="dg-cell-c" x="20" y="52" width="40" height="34" rx="3"/><text class="dg-t-c" x="40" y="69" text-anchor="middle">1</text><rect class="dg-cell" x="96" y="52" width="56" height="34" rx="4"/><text x="124" y="69" text-anchor="middle">50</text><rect class="dg-cell" x="188" y="52" width="56" height="34" rx="4"/><text x="216" y="69" text-anchor="middle">85</text><rect class="dg-cell" x="280" y="52" width="56" height="34" rx="4"/><text x="308" y="69" text-anchor="middle">92</text><rect class="dg-cell-dim" x="20" y="92" width="40" height="34" rx="3"/><text x="40" y="109" text-anchor="middle">2</text><rect class="dg-cell-c" x="20" y="132" width="40" height="34" rx="3"/><text class="dg-t-c" x="40" y="149" text-anchor="middle">3</text><rect class="dg-cell" x="96" y="132" width="56" height="34" rx="4"/><text x="124" y="149" text-anchor="middle">73</text><rect class="dg-cell" x="188" y="132" width="56" height="34" rx="4"/><text x="216" y="149" text-anchor="middle">101</text><rect class="dg-cell-dim" x="20" y="172" width="40" height="34" rx="3"/><text x="40" y="189" text-anchor="middle">4</text><rect class="dg-cell-dim" x="20" y="212" width="40" height="34" rx="3"/><text x="40" y="229" text-anchor="middle">5</text><rect class="dg-cell-c" x="20" y="252" width="40" height="34" rx="3"/><text class="dg-t-c" x="40" y="269" text-anchor="middle">6</text><rect class="dg-cell" x="96" y="252" width="56" height="34" rx="4"/><text x="124" y="269" text-anchor="middle">76</text></svg><ul class="dg-legend"><li><span class="dg-swatch c"></span>slot with keys</li><li><span class="dg-swatch dim"></span>empty slot</li></ul><figcaption>Keys 50, 700, 76, 85, 92, 73, 101 with h(k) = k mod 7. Colliding keys simply join the list in their slot, so a lookup scans only one short chain.</figcaption></figure>
 
 - Expected search cost: $\Theta(1 + \alpha)$. With $\alpha$ kept constant, that is $O(1)$.
 - $\alpha$ can exceed 1.
 - Deletion is easy: remove the node from its list.
 - Worst case: every key lands in one list, giving $O(n)$.
 
-## Open addressing
+## 4. Open addressing
 
 All keys live in the table itself. On a collision, **probe** other slots in a fixed sequence until a free one is found. Here $\alpha \le 1$ always.
 
@@ -116,11 +119,11 @@ You cannot simply empty a slot, because that breaks the probe chain for keys ins
 
 At $\alpha = 0.5$ an unsuccessful search needs about 2 probes; at $\alpha = 0.9$, about 10. That is why open-addressing tables are kept well below full.
 
-## Rehashing
+## 5. Rehashing
 
 When $\alpha$ passes a threshold (often 0.75 for chaining, 0.5 for linear probing), allocate a table about **twice as large** (usually the next prime) and re-insert every key with the new hash function. A single rehash is $O(n)$, but insertions stay **$O(1)$ amortized**.
 
-## Chaining vs open addressing
+## 6. Chaining vs open addressing
 
 | | Chaining | Open addressing |
 |---|---|---|
@@ -130,11 +133,19 @@ When $\alpha$ passes a threshold (often 0.75 for chaining, 0.5 for linear probin
 | Cache performance | Worse (pointer chasing) | Better (probes are close together) |
 | Sensitivity to a bad hash function | Lower | Higher (clustering) |
 
-## Applications
+## 7. Applications
 
 Symbol tables in compilers, database indexing, caches, sets and dictionaries (Python `dict`, Java `HashMap`), duplicate detection, and password storage (with cryptographic hashes, a related but different idea).
 
-## Viva questions
+## Summary
+
+- Division $h(k) = k \bmod m$ with $m$ prime; also multiplication, mid-square and folding.
+- Load factor $\alpha = n/m$; chaining allows $\alpha > 1$, open addressing needs $\alpha < 1$.
+- Linear probing causes primary clustering, quadratic probing secondary clustering; double hashing spreads best.
+- Open addressing deletes with tombstones; unsuccessful search costs about $1/(1 - \alpha)$ probes.
+- Rehash into a table about twice as large when $\alpha$ passes a threshold.
+
+## Check yourself
 
 <details>
 <summary>Why should the table size be a prime number for the division method?</summary>

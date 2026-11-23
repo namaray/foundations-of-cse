@@ -133,7 +133,7 @@ for (int i = 1; i <= n; i++) {
 }
 ```
 
-Total work for nested loops multiplies: two nested loops of $n$ iterations each run the inner body $n^2$ times (see [complexity analysis](/data-structures/complexity-analysis/#counting-steps-in-code)).
+Total work for nested loops multiplies: two nested loops of $n$ iterations each run the inner body $n^2$ times (see [complexity analysis](/data-structures/complexity-analysis/#3-counting-steps-in-code)).
 
 ## 5. Classic programs
 

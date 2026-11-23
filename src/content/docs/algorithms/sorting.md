@@ -140,7 +140,7 @@ When tracing a partition, write the array after every swap and mark where `i` is
 
 ## 4. Heapsort, in brief
 
-Build a max-heap in $O(n)$, then repeatedly swap the maximum to the end of the array and restore the heap. $\Theta(n \log n)$ in every case with $O(1)$ extra memory, but not stable. See [Heaps](/data-structures/heaps/#heapsort) for the full walkthrough.
+Build a max-heap in $O(n)$, then repeatedly swap the maximum to the end of the array and restore the heap. $\Theta(n \log n)$ in every case with $O(1)$ extra memory, but not stable. See [Heaps](/data-structures/heaps/#5-heapsort) for the full walkthrough.
 
 ## 5. Why n log n is the limit
 

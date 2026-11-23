@@ -49,7 +49,7 @@ An **index** is a separate structure of (search key, pointer) entries that leads
 
 ## 3. B+ trees
 
-The **B+ tree** is the standard database index. It is a balanced, multi-way search tree, related to the [B-trees in Data Structures](/data-structures/balanced-trees/#b-trees):
+The **B+ tree** is the standard database index. It is a balanced, multi-way search tree, related to the [B-trees in Data Structures](/data-structures/balanced-trees/#3-b-trees):
 
 - All **records (or pointers to them) are in the leaves**, which are linked left to right.
 - Internal nodes hold only keys for routing.

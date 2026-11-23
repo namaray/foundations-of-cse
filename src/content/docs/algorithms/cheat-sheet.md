@@ -22,7 +22,7 @@ Use this page for last-minute revision. Every row links back to the full notes.
 | [Insertion sort](/algorithms/sorting/#1-insertion-sort-the-simple-baseline) | $n$ | $n^2$ | $n^2$ | $1$ | Yes |
 | [Merge sort](/algorithms/sorting/#2-merge-sort-always-n-log-n) | $n \log n$ | $n \log n$ | $n \log n$ | $n$ | Yes |
 | [Quicksort](/algorithms/sorting/#3-quicksort-fastest-in-practice) | $n \log n$ | $n \log n$ | $n^2$ | $\log n$ | No |
-| [Heapsort](/data-structures/heaps/#heapsort) | $n \log n$ | $n \log n$ | $n \log n$ | $1$ | No |
+| [Heapsort](/data-structures/heaps/#5-heapsort) | $n \log n$ | $n \log n$ | $n \log n$ | $1$ | No |
 | [Counting sort](/algorithms/sorting/#counting-sort) | $n + k$ | $n + k$ | $n + k$ | $n + k$ | Yes |
 | [Radix sort](/algorithms/sorting/#radix-sort) | $d(n + k)$ | $d(n + k)$ | $d(n + k)$ | $n + k$ | Yes |
 | [Binary search](/algorithms/searching/#binary-search) | $1$ | $\log n$ | $\log n$ | $1$ | — |

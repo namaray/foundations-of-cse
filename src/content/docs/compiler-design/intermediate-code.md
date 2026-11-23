@@ -105,7 +105,7 @@ Three ways to store three-address code:
 
 ## 5. Arrays
 
-For `A[i]` with base address `base` and element width `w`, the address is `base + i * w`. For a 2-D array in [row-major order](/data-structures/arrays/#two-dimensional-arrays) with $n$ columns, `A[i][j]` is at `base + (i * n + j) * w`.
+For `A[i]` with base address `base` and element width `w`, the address is `base + i * w`. For a 2-D array in [row-major order](/data-structures/arrays/#2-two-dimensional-arrays) with $n$ columns, `A[i][j]` is at `base + (i * n + j) * w`.
 
 ```text
 t1 = i * n

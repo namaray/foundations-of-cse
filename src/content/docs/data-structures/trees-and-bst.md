@@ -2,20 +2,27 @@
 title: Trees & Binary Search Trees
 description: Tree terminology, binary tree properties and formulas, the four traversals, building a tree from traversals, and BST search, insertion and deletion.
 sidebar:
+  label: "7. Trees and BSTs"
   order: 7
+lesson:
+  module: Hashing and trees
+  prerequisites:
+    - label: Queues
+      link: /data-structures/queues/
+  outcomes:
+    - Use tree terminology (depth, height, degree, leaf) correctly
+    - State the node-count properties of binary trees
+    - Traverse a tree in preorder, inorder, postorder and level order, and rebuild it from two traversals
+    - Search, insert and delete in a BST, including the two-child case
+  keyIdea: >-
+    A tree is a hierarchy with one root and no cycles. In a **binary search tree** every left subtree holds smaller keys and every right subtree larger ones, so search, insert and delete follow one root-to-leaf path: $O(h)$. That is $O(\log n)$ when the tree is balanced and $O(n)$ when it degenerates into a chain.
 ---
 
 A **tree** is a hierarchical structure of nodes connected by edges, with one **root** and no cycles. A tree with $n$ nodes always has exactly $n - 1$ edges.
 
-## Terminology
+## 1. Terminology
 
-```text
-            A          ← root (depth 0)
-          /   \
-         B     C       ← depth 1
-        / \     \
-       D   E     F     ← leaves (depth 2)
-```
+<figure class="diagram"><svg style="--dg-min:440px" class="dg" viewBox="0 0 440 220" role="img" aria-labelledby="tterm-t"><title id="tterm-t">A tree with root A, children B and C, and leaves D, E and F.</title><defs><marker id="ah-tterm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-tterm-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-a" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-tterm-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-b" d="M0,0 L10,5 L0,10 z"/></marker></defs><line class="dg-line" x1="156.6" y1="42" x2="103.4" y2="90"/><line class="dg-line" x1="81.3" y1="117.7" x2="58.7" y2="158.3"/><line class="dg-line" x1="98.7" y1="117.7" x2="121.3" y2="158.3"/><line class="dg-line" x1="183.4" y1="42" x2="236.6" y2="90"/><line class="dg-line" x1="258.7" y1="117.7" x2="281.3" y2="158.3"/><circle class="dg-cell-c" cx="50" cy="174" r="18"/><text class="dg-t-c" x="50" y="174" text-anchor="middle">D</text><circle class="dg-cell-c" cx="130" cy="174" r="18"/><text class="dg-t-c" x="130" y="174" text-anchor="middle">E</text><circle class="dg-cell" cx="90" cy="102" r="18"/><text x="90" y="102" text-anchor="middle">B</text><circle class="dg-cell-c" cx="290" cy="174" r="18"/><text class="dg-t-c" x="290" y="174" text-anchor="middle">F</text><circle class="dg-cell" cx="250" cy="102" r="18"/><text x="250" y="102" text-anchor="middle">C</text><circle class="dg-cell-a" cx="170" cy="30" r="18"/><text class="dg-t-a" x="170" y="30" text-anchor="middle">A</text><text class="dg-t-muted" x="330" y="30">depth 0  (root)</text><text class="dg-t-muted" x="330" y="102">depth 1</text><text class="dg-t-muted" x="330" y="174">depth 2  (leaves)</text></svg><ul class="dg-legend"><li><span class="dg-swatch a"></span>root</li><li><span class="dg-swatch c"></span>leaf</li></ul><figcaption>The tree used in the table below. It has 6 nodes and 5 edges, and its height is 2 (counting edges).</figcaption></figure>
 
 | Term | Meaning (using the tree above) |
 |---|---|
@@ -34,7 +41,7 @@ A **tree** is a hierarchical structure of nodes connected by edges, with one **r
 Some textbooks count height in **nodes** rather than edges, so a single node has height 1 instead of 0. State which convention you are using in exams.
 :::
 
-## Binary trees
+## 2. Binary trees
 
 A **binary tree** gives every node at most two children, called **left** and **right**.
 
@@ -72,7 +79,7 @@ typedef struct TreeNode {
 } TreeNode;
 ```
 
-## Traversals
+## 3. Traversals
 
 | Traversal | Order | Result for the tree above |
 |---|---|---|
@@ -105,7 +112,7 @@ All four traversals take $O(n)$ time. The recursive ones use $O(h)$ stack space.
 
 This rebuilds the tree shown at the top of the page.
 
-## Binary search trees (BST)
+## 4. Binary search trees (BST)
 
 A **BST** is a binary tree where, for every node, all keys in the **left** subtree are smaller and all keys in the **right** subtree are larger. An inorder traversal of a BST therefore lists the keys in **sorted order**.
 
@@ -127,13 +134,7 @@ Search for the key; where the search falls off the tree, attach a new leaf.
 
 **Example:** insert 50, 30, 70, 20, 40, 60, 80 in that order.
 
-```text
-            50
-          /    \
-        30      70
-       /  \    /  \
-      20  40  60  80
-```
+<figure class="diagram"><svg style="--dg-min:440px" class="dg" viewBox="0 0 440 220" role="img" aria-labelledby="bstins-t"><title id="bstins-t">The BST built from 50, 30, 70, 20, 40, 60, 80; inserting 60 went right at 50 and left at 70.</title><defs><marker id="ah-bstins" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-bstins-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-a" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-bstins-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-b" d="M0,0 L10,5 L0,10 z"/></marker></defs><line class="dg-line" x1="204.9" y1="39.9" x2="125.1" y2="92.1"/><line class="dg-line" x1="99.1" y1="116.3" x2="65.9" y2="159.7"/><line class="dg-line" x1="120.9" y1="116.3" x2="154.1" y2="159.7"/><line class="dg-line-a" x1="235.1" y1="39.9" x2="314.9" y2="92.1"/><line class="dg-line-a" x1="319.1" y1="116.3" x2="285.9" y2="159.7"/><line class="dg-line" x1="340.9" y1="116.3" x2="374.1" y2="159.7"/><circle class="dg-cell" cx="55" cy="174" r="18"/><text x="55" y="174" text-anchor="middle">20</text><circle class="dg-cell" cx="165" cy="174" r="18"/><text x="165" y="174" text-anchor="middle">40</text><circle class="dg-cell" cx="110" cy="102" r="18"/><text x="110" y="102" text-anchor="middle">30</text><circle class="dg-cell-b" cx="275" cy="174" r="18"/><text class="dg-t-b" x="275" y="174" text-anchor="middle">60</text><circle class="dg-cell" cx="385" cy="174" r="18"/><text x="385" y="174" text-anchor="middle">80</text><circle class="dg-cell-a" cx="330" cy="102" r="18"/><text class="dg-t-a" x="330" y="102" text-anchor="middle">70</text><circle class="dg-cell-a" cx="220" cy="30" r="18"/><text class="dg-t-a" x="220" y="30" text-anchor="middle">50</text><text class="dg-t-a" x="330" y="16" style="font-size:13px">60 &gt; 50: go right</text><text class="dg-t-a" x="352" y="120" style="font-size:13px">60 &lt; 70: go left</text></svg><ul class="dg-legend"><li><span class="dg-swatch a"></span>search path</li><li><span class="dg-swatch b"></span>new leaf</li></ul><figcaption>Each insertion walks down from the root, going left for smaller keys and right for larger ones, and attaches a new leaf where it falls off. The path for 60 is highlighted.</figcaption></figure>
 
 ### Deletion: three cases
 
@@ -143,13 +144,7 @@ Search for the key; where the search falls off the tree, attach a new leaf.
 
 **Example.** Deleting **50** from the tree above: the inorder successor is **60**. Copy 60 into the root and delete the original 60 leaf.
 
-```text
-            60
-          /    \
-        30      70
-       /  \       \
-      20  40      80
-```
+<figure class="diagram"><svg style="--dg-min:460px" class="dg" viewBox="0 0 600 210" role="img" aria-labelledby="bstdel-t"><title id="bstdel-t">Deleting 50, which has two children: its inorder successor 60 is copied into the root and the old 60 leaf is removed.</title><defs><marker id="ah-bstdel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-bstdel-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-a" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-bstdel-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-b" d="M0,0 L10,5 L0,10 z"/></marker></defs><line class="dg-line" x1="127.3" y1="42.7" x2="82.7" y2="87.3"/><line class="dg-line" x1="62" y1="116.1" x2="43" y2="153.9"/><line class="dg-line" x1="78" y1="116.1" x2="97" y2="153.9"/><line class="dg-line" x1="152.7" y1="42.7" x2="197.3" y2="87.3"/><line class="dg-line" x1="202" y1="116.1" x2="183" y2="153.9"/><line class="dg-line" x1="218" y1="116.1" x2="237" y2="153.9"/><line class="dg-line" x1="447.3" y1="42.7" x2="402.7" y2="87.3"/><line class="dg-line" x1="382" y1="116.1" x2="363" y2="153.9"/><line class="dg-line" x1="398" y1="116.1" x2="417" y2="153.9"/><line class="dg-line" x1="472.7" y1="42.7" x2="517.3" y2="87.3"/><line class="dg-line" x1="538" y1="116.1" x2="557" y2="153.9"/><line class="dg-line" x1="268" y1="100" x2="330" y2="100" marker-end="url(#ah-bstdel)"/><circle class="dg-cell" cx="35" cy="170" r="18"/><text x="35" y="170" text-anchor="middle">20</text><circle class="dg-cell" cx="105" cy="170" r="18"/><text x="105" y="170" text-anchor="middle">40</text><circle class="dg-cell" cx="70" cy="100" r="18"/><text x="70" y="100" text-anchor="middle">30</text><circle class="dg-cell-c" cx="175" cy="170" r="18"/><text class="dg-t-c" x="175" y="170" text-anchor="middle">60</text><circle class="dg-cell" cx="245" cy="170" r="18"/><text x="245" y="170" text-anchor="middle">80</text><circle class="dg-cell" cx="210" cy="100" r="18"/><text x="210" y="100" text-anchor="middle">70</text><circle class="dg-cell-b" cx="140" cy="30" r="18"/><text class="dg-t-b" x="140" y="30" text-anchor="middle">50</text><circle class="dg-cell" cx="355" cy="170" r="18"/><text x="355" y="170" text-anchor="middle">20</text><circle class="dg-cell" cx="425" cy="170" r="18"/><text x="425" y="170" text-anchor="middle">40</text><circle class="dg-cell" cx="390" cy="100" r="18"/><text x="390" y="100" text-anchor="middle">30</text><circle class="dg-cell" cx="565" cy="170" r="18"/><text x="565" y="170" text-anchor="middle">80</text><circle class="dg-cell" cx="530" cy="100" r="18"/><text x="530" y="100" text-anchor="middle">70</text><circle class="dg-cell-c" cx="460" cy="30" r="18"/><text class="dg-t-c" x="460" y="30" text-anchor="middle">60</text><text class="dg-t-muted" x="299" y="86" text-anchor="middle" style="font-size:13px">delete 50</text></svg><ul class="dg-legend"><li><span class="dg-swatch b"></span>node to delete</li><li><span class="dg-swatch c"></span>inorder successor</li></ul><figcaption>Deleting a node with two children: copy in the inorder successor (the smallest key in the right subtree, here 60), then delete that successor, which has at most one child.</figcaption></figure>
 
 ### Cost depends on height
 
@@ -160,7 +155,16 @@ Search for the key; where the search falls off the tree, attach a new leaf.
 
 Inserting keys in sorted order (1, 2, 3, 4, …) produces a skewed tree that is no better than a linked list. [Self-balancing trees](/data-structures/balanced-trees/) fix this.
 
-## Viva questions
+## Summary
+
+- $n$ nodes have $n - 1$ edges; depth counts down from the root, height up from the deepest leaf.
+- Full, complete, perfect and skewed binary trees; a perfect tree of height $h$ has $2^{h+1} - 1$ nodes.
+- Preorder (node first), inorder (node middle), postorder (node last), level order (queue): all $O(n)$.
+- Inorder plus preorder or postorder rebuilds a binary tree uniquely.
+- BST: inorder traversal gives sorted order; search, insert and delete cost $O(h)$.
+- Deleting a node with two children: copy in its inorder successor, then delete the successor.
+
+## Check yourself
 
 <details>
 <summary>Why does an inorder traversal of a BST give sorted output?</summary>

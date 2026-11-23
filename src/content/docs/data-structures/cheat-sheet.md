@@ -2,11 +2,13 @@
 title: Data Structures Cheat Sheet
 description: One-page revision of operation costs, key formulas and the most-asked viva questions for every data structure.
 sidebar:
-  label: Cheat sheet
+  label: "13. Cheat sheet"
   order: 20
   badge:
     text: Revision
     variant: note
+lesson:
+  module: Revision
 ---
 
 Use this page for last-minute revision. Every row links back to the full notes.
@@ -18,18 +20,18 @@ Average case, with the worst case in brackets where it differs.
 | Structure | Access | Search | Insert | Delete | Notes |
 |---|---|---|---|---|---|
 | [Array](/data-structures/arrays/) | $O(1)$ | $O(n)$ | $O(n)$ | $O(n)$ | Sorted: search $O(\log n)$ |
-| [Dynamic array](/data-structures/arrays/#dynamic-arrays) | $O(1)$ | $O(n)$ | $O(1)$ amortized at end | $O(n)$ | Doubling on resize |
+| [Dynamic array](/data-structures/arrays/#4-dynamic-arrays) | $O(1)$ | $O(n)$ | $O(1)$ amortized at end | $O(n)$ | Doubling on resize |
 | [Linked list](/data-structures/linked-lists/) | $O(n)$ | $O(n)$ | $O(1)$ at a known node | $O(1)$ at a known node | Doubly linked for $O(1)$ delete |
 | [Stack](/data-structures/stacks/) | top only | — | $O(1)$ push | $O(1)$ pop | LIFO |
 | [Queue](/data-structures/queues/) | front only | — | $O(1)$ enqueue | $O(1)$ dequeue | FIFO; circular in arrays |
 | [Hash table](/data-structures/hashing/) | — | $O(1)$ [$O(n)$] | $O(1)$ [$O(n)$] | $O(1)$ [$O(n)$] | Unordered |
 | [BST](/data-structures/trees-and-bst/) | — | $O(\log n)$ [$O(n)$] | $O(\log n)$ [$O(n)$] | $O(\log n)$ [$O(n)$] | Skewed when input is sorted |
 | [AVL / red–black](/data-structures/balanced-trees/) | — | $O(\log n)$ | $O(\log n)$ | $O(\log n)$ | Guaranteed worst case |
-| [B-tree](/data-structures/balanced-trees/#b-trees) | — | $O(\log n)$ | $O(\log n)$ | $O(\log n)$ | Few disk reads |
+| [B-tree](/data-structures/balanced-trees/#3-b-trees) | — | $O(\log n)$ | $O(\log n)$ | $O(\log n)$ | Few disk reads |
 | [Binary heap](/data-structures/heaps/) | max/min $O(1)$ | $O(n)$ | $O(\log n)$ | $O(\log n)$ extract | Build in $O(n)$ |
 | [Union–find](/data-structures/disjoint-set/) | — | find $O(\alpha(n))$ | union $O(\alpha(n))$ | — | Amortized, both heuristics |
 | [Trie](/data-structures/tries-and-range-trees/) | — | $O(L)$ | $O(L)$ | $O(L)$ | $L$ = key length |
-| [Segment tree](/data-structures/tries-and-range-trees/#segment-trees) | — | range query $O(\log n)$ | update $O(\log n)$ | — | Build $O(n)$ |
+| [Segment tree](/data-structures/tries-and-range-trees/#2-segment-trees) | — | range query $O(\log n)$ | update $O(\log n)$ | — | Build $O(n)$ |
 
 ## Formulas to memorise
 
