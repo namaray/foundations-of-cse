@@ -126,10 +126,10 @@ def figure(d, caption, legend=None):
     return f'<figure class="diagram">{d.svg()}{leg}<figcaption>{escape(caption)}</figcaption></figure>'
 
 
-def N(v, k='', l=None, r=None, e='', kids=None):
+def N(v, k='', l=None, r=None, e='', kids=None, el=None):
     """A tree node for bintree(): value, kind, left, right, kind of the edge into it.
     Pass kids=[...] instead of l and r for a node with any number of children."""
-    return {'v': v, 'k': k, 'l': l, 'r': r, 'e': e, 'kids': kids}
+    return {'v': v, 'k': k, 'l': l, 'r': r, 'e': e, 'kids': kids, 'el': el}
 
 
 def bintree(d, t, x, y, spread, dy=62, r=18, size=None, sub_w=34):
@@ -148,7 +148,8 @@ def bintree(d, t, x, y, spread, dy=62, r=18, size=None, sub_w=34):
             continue
         cy = y + dy
         rc = 0 if c['k'] == 'sub' else r
-        d.edge((x, y), (cx, cy - (14 if c['k'] == 'sub' else 0)), r, rc, c['e'])
+        d.edge((x, y), (cx, cy - (14 if c['k'] == 'sub' else 0)), r, rc, c['e'], label=c.get('el'),
+               label_cls=c['e'] or 'muted')
         bintree(d, c, cx, cy, spread / 2, dy, r, size, sub_w)
     if t['k'] == 'sub':
         h = 34
@@ -162,3 +163,31 @@ def bintree(d, t, x, y, spread, dy=62, r=18, size=None, sub_w=34):
         d.cell(x - w / 2, y - 16, w, 32, t['v'], t['k'][4:], rx=4, size=size)
     else:
         d.circle(x, y, r, t['v'], t['k'], size=size)
+
+
+def tidytree(d, t, x0, y, gap=60, dy=66, r=18, size=None):
+    """Like bintree, but leaves are spaced evenly left to right and each parent sits
+    centred over its children, so deep, lopsided trees never overlap."""
+    counter = [0]
+
+    def place(n, depth):
+        kids = [c for c in ([n['l'], n['r']] if n['kids'] is None else n['kids']) if c is not None]
+        n['_kids'] = kids
+        n['_y'] = y + depth * dy
+        if not kids:
+            n['_x'] = x0 + counter[0] * gap
+            counter[0] += 1
+        else:
+            for c in kids:
+                place(c, depth + 1)
+            n['_x'] = (kids[0]['_x'] + kids[-1]['_x']) / 2
+
+    def draw(n):
+        for c in n['_kids']:
+            d.edge((n['_x'], n['_y']), (c['_x'], c['_y']), r, r, c['e'], label=c.get('el'),
+                   label_cls=c['e'] or 'muted')
+            draw(c)
+        d.circle(n['_x'], n['_y'], r, n['v'], n['k'], size=size)
+
+    place(t, 0)
+    draw(t)

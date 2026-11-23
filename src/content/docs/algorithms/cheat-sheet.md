@@ -25,35 +25,35 @@ Use this page for last-minute revision. Every row links back to the full notes.
 | [Heapsort](/data-structures/heaps/#5-heapsort) | $n \log n$ | $n \log n$ | $n \log n$ | $1$ | No |
 | [Counting sort](/algorithms/sorting/#counting-sort) | $n + k$ | $n + k$ | $n + k$ | $n + k$ | Yes |
 | [Radix sort](/algorithms/sorting/#radix-sort) | $d(n + k)$ | $d(n + k)$ | $d(n + k)$ | $n + k$ | Yes |
-| [Binary search](/algorithms/searching/#binary-search) | $1$ | $\log n$ | $\log n$ | $1$ | — |
-| [Quickselect](/algorithms/searching/#selection-the-k-th-smallest-element) | $n$ | $n$ | $n^2$ | $\log n$ | — |
+| [Binary search](/algorithms/searching/#2-binary-search) | $1$ | $\log n$ | $\log n$ | $1$ | — |
+| [Quickselect](/algorithms/searching/#4-selection-the-k-th-smallest-element) | $n$ | $n$ | $n^2$ | $\log n$ | — |
 
 ### Graphs
 
 | Algorithm | Solves | Time |
 |---|---|---|
 | [BFS / DFS](/algorithms/graph-traversal/) | Traversal, unweighted shortest paths | $O(V + E)$ |
-| [Topological sort](/algorithms/graph-traversal/#topological-sort) | Ordering a DAG | $O(V + E)$ |
-| [Kosaraju / Tarjan](/algorithms/graph-traversal/#strongly-connected-components-scc) | Strongly connected components | $O(V + E)$ |
-| [Dijkstra](/algorithms/shortest-paths/#dijkstras-algorithm) | Single-source, non-negative weights | $O((V + E) \log V)$ |
-| [Bellman–Ford](/algorithms/shortest-paths/#bellmanford) | Single-source, negative weights, cycle detection | $O(VE)$ |
-| [DAG shortest paths](/algorithms/shortest-paths/#shortest-paths-in-a-dag) | Single-source in a DAG | $O(V + E)$ |
-| [Floyd–Warshall](/algorithms/shortest-paths/#floydwarshall-all-pairs) | All pairs | $O(V^3)$ |
-| [Kruskal](/algorithms/minimum-spanning-trees/#kruskals-algorithm) | MST | $O(E \log E)$ |
-| [Prim](/algorithms/minimum-spanning-trees/#prims-algorithm) | MST | $O(E \log V)$ |
-| [Edmonds–Karp](/algorithms/network-flow/#fordfulkerson-method) | Maximum flow | $O(VE^2)$ |
+| [Topological sort](/algorithms/graph-traversal/#3-topological-sort) | Ordering a DAG | $O(V + E)$ |
+| [Kosaraju / Tarjan](/algorithms/graph-traversal/#4-strongly-connected-components-scc) | Strongly connected components | $O(V + E)$ |
+| [Dijkstra](/algorithms/shortest-paths/#2-dijkstras-algorithm) | Single-source, non-negative weights | $O((V + E) \log V)$ |
+| [Bellman–Ford](/algorithms/shortest-paths/#3-bellmanford) | Single-source, negative weights, cycle detection | $O(VE)$ |
+| [DAG shortest paths](/algorithms/shortest-paths/#4-shortest-paths-in-a-dag) | Single-source in a DAG | $O(V + E)$ |
+| [Floyd–Warshall](/algorithms/shortest-paths/#5-floydwarshall-all-pairs) | All pairs | $O(V^3)$ |
+| [Kruskal](/algorithms/minimum-spanning-trees/#3-kruskals-algorithm) | MST | $O(E \log E)$ |
+| [Prim](/algorithms/minimum-spanning-trees/#4-prims-algorithm) | MST | $O(E \log V)$ |
+| [Edmonds–Karp](/algorithms/network-flow/#2-fordfulkerson-method) | Maximum flow | $O(VE^2)$ |
 
 ### Dynamic programming and strings
 
 | Algorithm | Time |
 |---|---|
-| [0/1 knapsack](/algorithms/dynamic-programming/#01-knapsack) | $O(nW)$ (pseudo-polynomial) |
-| [LCS](/algorithms/dynamic-programming/#longest-common-subsequence-lcs), [edit distance](/algorithms/dynamic-programming/#edit-distance) | $O(mn)$ |
-| [Matrix chain multiplication](/algorithms/dynamic-programming/#matrix-chain-multiplication) | $O(n^3)$ |
-| [LIS](/algorithms/dynamic-programming/#longest-increasing-subsequence-lis) | $O(n^2)$, or $O(n \log n)$ |
-| [Naive string matching](/algorithms/string-matching/#naive-algorithm) | $O((n - m + 1)\,m)$ |
-| [Rabin–Karp](/algorithms/string-matching/#rabinkarp) | $O(n + m)$ expected, $O(nm)$ worst |
-| [KMP](/algorithms/string-matching/#knuthmorrispratt-kmp) | $O(n + m)$ |
+| [0/1 knapsack](/algorithms/dynamic-programming/#4-01-knapsack) | $O(nW)$ (pseudo-polynomial) |
+| [LCS](/algorithms/dynamic-programming/#5-longest-common-subsequence-lcs), [edit distance](/algorithms/dynamic-programming/#8-edit-distance) | $O(mn)$ |
+| [Matrix chain multiplication](/algorithms/dynamic-programming/#6-matrix-chain-multiplication) | $O(n^3)$ |
+| [LIS](/algorithms/dynamic-programming/#9-longest-increasing-subsequence-lis) | $O(n^2)$, or $O(n \log n)$ |
+| [Naive string matching](/algorithms/string-matching/#1-naive-algorithm) | $O((n - m + 1)\,m)$ |
+| [Rabin–Karp](/algorithms/string-matching/#2-rabinkarp) | $O(n + m)$ expected, $O(nm)$ worst |
+| [KMP](/algorithms/string-matching/#3-knuthmorrispratt-kmp) | $O(n + m)$ |
 
 ## The Master theorem
 
@@ -75,7 +75,7 @@ Quick answers: $T(n) = T(n/2) + 1 \to \log n$; $2T(n/2) + n \to n \log n$; $T(n-
 | [Greedy](/algorithms/greedy/) | Take the locally best choice, never undo it | One per step | Activity selection, Huffman, Dijkstra, Kruskal |
 | [Dynamic programming](/algorithms/dynamic-programming/) | Solve every subproblem once and store it | Overlapping | Knapsack, LCS, Floyd–Warshall |
 | [Backtracking](/algorithms/backtracking/) | Depth-first search, abandon invalid partial solutions | State-space tree | N-Queens, subset sum, colouring |
-| [Branch and bound](/algorithms/backtracking/#branch-and-bound) | Search, prune with optimistic bounds | State-space tree | 0/1 knapsack, TSP |
+| [Branch and bound](/algorithms/backtracking/#3-branch-and-bound) | Search, prune with optimistic bounds | State-space tree | 0/1 knapsack, TSP |
 
 ## Key facts
 

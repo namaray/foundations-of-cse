@@ -6,11 +6,23 @@ sidebar:
   order: 8
 lesson:
   module: Graph algorithms
+  prerequisites:
+    - label: Graph traversal
+      link: /algorithms/graph-traversal/
+    - label: Heaps
+      link: /data-structures/heaps/
+  outcomes:
+    - Explain relaxation and trace Dijkstra's algorithm
+    - Explain why Dijkstra fails with negative edges and use Bellman–Ford instead
+    - Find shortest paths in a DAG in linear time
+    - Compute all-pairs shortest paths with Floyd–Warshall
+  keyIdea: >-
+    Every shortest-path algorithm repeatedly **relaxes** edges: "is going through $u$ a shorter way to $v$?" They differ in the order. **Dijkstra** greedily finalises the closest vertex (non-negative weights only); **Bellman–Ford** relaxes everything $V - 1$ times and detects negative cycles; **Floyd–Warshall** uses DP for all pairs.
 ---
 
-Given a weighted graph, find the minimum-total-weight path from a source $s$ to other vertices. For unweighted graphs, [BFS](/algorithms/graph-traversal/#bfs-shortest-paths-in-unweighted-graphs) already solves this.
+Given a weighted graph, find the minimum-total-weight path from a source $s$ to other vertices. For unweighted graphs, [BFS](/algorithms/graph-traversal/#1-bfs-shortest-paths-in-unweighted-graphs) already solves this.
 
-## Relaxation
+## 1. Relaxation
 
 Every single-source algorithm here keeps an estimate `d[v]` (initially $\infty$, and $0$ for $s$) and improves it by **relaxing** edges:
 
@@ -23,7 +35,7 @@ RELAX(u, v, w):
 
 The algorithms differ only in **which edges they relax, and in what order**.
 
-## Dijkstra's algorithm
+## 2. Dijkstra's algorithm
 
 **Requirement:** all edge weights are **non-negative**.
 
@@ -60,6 +72,8 @@ Each row shows the distances after extracting one vertex and relaxing its edges.
 
 Final distances: B = 3 (A→C→B), C = 2, D = 8 (A→C→B→D), E = 10 (A→C→B→D→E).
 
+<figure class="diagram"><svg style="--dg-min:460px" class="dg" viewBox="0 0 460 230" role="img" aria-labelledby="dijk-t"><title id="dijk-t">Dijkstra from A: final distances B 3, C 2, D 8, E 10, with the shortest-path tree A to C, C to B, B to D, D to E.</title><defs><marker id="ah-dijk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-dijk-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-a" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-dijk-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-b" d="M0,0 L10,5 L0,10 z"/></marker></defs><line class="dg-line" x1="68.3" y1="102" x2="189.8" y2="48.8" marker-end="url(#ah-dijk)"/><line class="dg-line-a" x1="68.3" y1="118" x2="189.8" y2="171.2" marker-end="url(#ah-dijk-a)"/><line class="dg-line-a" x1="210" y1="160" x2="210" y2="62" marker-end="url(#ah-dijk-a)"/><line class="dg-line-a" x1="230" y1="40" x2="358" y2="40" marker-end="url(#ah-dijk-a)"/><line class="dg-line" x1="225.4" y1="167.3" x2="363" y2="54" marker-end="url(#ah-dijk)"/><line class="dg-line" x1="230" y1="180" x2="358" y2="180" marker-end="url(#ah-dijk)"/><line class="dg-line-a" x1="380" y1="60" x2="380" y2="158" marker-end="url(#ah-dijk-a)"/><text class="dg-t-muted" x="133.9" y="86.4" text-anchor="middle">4</text><text class="dg-t-muted" x="124.3" y="155.6" text-anchor="middle">2</text><text class="dg-t-muted" x="222" y="111" text-anchor="middle">1</text><text class="dg-t-muted" x="294" y="52" text-anchor="middle">5</text><text class="dg-t-muted" x="301.9" y="119.9" text-anchor="middle">8</text><text class="dg-t-muted" x="294" y="192" text-anchor="middle">10</text><text class="dg-t-muted" x="368" y="109" text-anchor="middle">2</text><circle class="dg-cell-a" cx="50" cy="110" r="20"/><text class="dg-t-a" x="50" y="110" text-anchor="middle">A</text><circle class="dg-cell-c" cx="210" cy="40" r="20"/><text class="dg-t-c" x="210" y="40" text-anchor="middle">B</text><circle class="dg-cell-c" cx="210" cy="180" r="20"/><text class="dg-t-c" x="210" y="180" text-anchor="middle">C</text><circle class="dg-cell-c" cx="380" cy="40" r="20"/><text class="dg-t-c" x="380" y="40" text-anchor="middle">D</text><circle class="dg-cell-c" cx="380" cy="180" r="20"/><text class="dg-t-c" x="380" y="180" text-anchor="middle">E</text><text class="dg-t-a" x="48" y="142" text-anchor="middle" style="font-size:13px">d = 0</text><text class="dg-t-c" x="210" y="10" text-anchor="middle" style="font-size:13px">d = 3</text><text class="dg-t-c" x="210" y="212" text-anchor="middle" style="font-size:13px">d = 2</text><text class="dg-t-c" x="380" y="10" text-anchor="middle" style="font-size:13px">d = 8</text><text class="dg-t-c" x="380" y="212" text-anchor="middle" style="font-size:13px">d = 10</text></svg><ul class="dg-legend"><li><span class="dg-swatch a"></span>shortest-path tree edge</li><li><span class="dg-swatch c"></span>final distance</li></ul><figcaption>Final distances from A, with the shortest-path tree highlighted. A→B costs 4 directly but only 3 through C, which is why B was updated in step 2.</figcaption></figure>
+
 ### Running time
 
 | Priority queue | Time |
@@ -74,7 +88,7 @@ Edges A→B (2), A→C (3), C→B (−2). Dijkstra extracts B first with $d[B] =
 
 Dijkstra's correctness depends on the fact that adding an edge never makes a path shorter, which is false once weights can be negative.
 
-## Bellman–Ford
+## 3. Bellman–Ford
 
 **Handles negative edge weights** and **detects negative cycles**.
 
@@ -91,13 +105,13 @@ BELLMAN-FORD(G, s):
 
 Time $O(VE)$. Bellman–Ford is a form of dynamic programming; it underlies distance-vector routing protocols such as RIP.
 
-## Shortest paths in a DAG
+## 4. Shortest paths in a DAG
 
 In a DAG, relax the edges out of each vertex in **topological order**. Every vertex's distance is final before its outgoing edges are used, so a single pass suffices: $O(V + E)$, and negative weights are fine.
 
 Negating the weights finds **longest** paths in a DAG, which is how project scheduling finds the *critical path*.
 
-## Floyd–Warshall (all pairs)
+## 5. Floyd–Warshall (all pairs)
 
 Finds the shortest path between **every** pair of vertices. Let $d_k[i][j]$ be the shortest $i \to j$ path using only vertices $1 \dots k$ as intermediate stops:
 
@@ -115,7 +129,7 @@ for (int k = 0; k < V; k++)
 
 The loop over $k$ **must** be the outermost. Time $O(V^3)$, space $O(V^2)$. Negative edges are allowed; a negative value on the diagonal, $d[i][i] < 0$, signals a negative cycle.
 
-## Which algorithm when?
+## 6. Which algorithm when?
 
 | Situation | Algorithm | Time |
 |---|---|---|
@@ -126,7 +140,15 @@ The loop over $k$ **must** be the outermost. Time $O(V^3)$, space $O(V^2)$. Nega
 | All pairs, dense graph | Floyd–Warshall | $O(V^3)$ |
 | All pairs, sparse graph with negative edges | Johnson's (reweight, then Dijkstra from each vertex) | $O(VE \log V)$ |
 
-## Viva questions
+## Summary
+
+- Relax$(u, v)$: if $d[u] + w < d[v]$, update $d[v]$ and parent.
+- Dijkstra: non-negative weights; $O((V + E) \log V)$ with a binary heap, $O(V^2)$ with an array.
+- Bellman–Ford: $V - 1$ rounds of relaxing every edge, $O(VE)$; one more round detects negative cycles.
+- DAG: relax in topological order, $O(V + E)$, negative weights allowed.
+- Floyd–Warshall: $d_k[i][j] = \min(d_{k-1}[i][j], d_{k-1}[i][k] + d_{k-1}[k][j])$, $O(V^3)$.
+
+## Check yourself
 
 <details>
 <summary>Why can't Dijkstra's algorithm handle negative edge weights?</summary>

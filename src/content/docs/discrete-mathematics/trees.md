@@ -69,7 +69,7 @@ A **spanning tree** of a connected graph $G$ is a subgraph that is a tree and in
 
 - **Search trees** (BST, AVL, B-trees) organise data for fast lookup.
 - **Decision trees** model algorithms and give lower bounds.
-- **Prefix codes** such as Huffman codes are binary trees with characters at the leaves; see [Greedy algorithms: Huffman coding](/algorithms/greedy/#huffman-coding).
+- **Prefix codes** such as Huffman codes are binary trees with characters at the leaves; see [Greedy algorithms: Huffman coding](/algorithms/greedy/#4-huffman-coding).
 - **Expression trees**: internal vertices are operators, leaves are operands. Preorder gives prefix notation and postorder gives postfix.
 - **Game trees** for minimax search; see the [minimax simulation](/artificial-intelligence/minimax-simulation/).
 

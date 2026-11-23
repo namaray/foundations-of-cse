@@ -59,7 +59,7 @@ The **closure** of $R$ for a property is the smallest relation containing $R$ th
 
 - **Reflexive closure:** add $(a, a)$ for every $a$.
 - **Symmetric closure:** add $(b, a)$ for every $(a, b)$.
-- **Transitive closure:** add $(a, c)$ whenever $c$ is reachable from $a$ by a path. It is computed with **Warshall's algorithm** in $O(n^3)$, the same triple loop as [Floyd–Warshall](/algorithms/shortest-paths/#floydwarshall-all-pairs) using OR and AND instead of min and plus.
+- **Transitive closure:** add $(a, c)$ whenever $c$ is reachable from $a$ by a path. It is computed with **Warshall's algorithm** in $O(n^3)$, the same triple loop as [Floyd–Warshall](/algorithms/shortest-paths/#5-floydwarshall-all-pairs) using OR and AND instead of min and plus.
 
 ## 4. Equivalence relations
 
@@ -105,7 +105,7 @@ Edges: 1–2, 1–3, 2–4, 2–6, 3–6, 4–12, 6–12. (There is no edge 2–
 
 A **lattice** is a poset where every pair has both a join and a meet. Divisibility on the divisors of 12 is a lattice.
 
-A **topological sort** extends a partial order to a total order; see [Graph traversal](/algorithms/graph-traversal/#topological-sort).
+A **topological sort** extends a partial order to a total order; see [Graph traversal](/algorithms/graph-traversal/#3-topological-sort).
 
 ## Summary
 

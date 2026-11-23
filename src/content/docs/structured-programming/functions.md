@@ -149,7 +149,7 @@ void hanoi(int n, char from, char to, char via) {
 }                                      // 2^n - 1 moves
 ```
 
-Naive `fib` recomputes the same values repeatedly and takes exponential time; [dynamic programming](/algorithms/dynamic-programming/#why-storing-answers-matters) fixes this.
+Naive `fib` recomputes the same values repeatedly and takes exponential time; [dynamic programming](/algorithms/dynamic-programming/#1-why-storing-answers-matters) fixes this.
 
 ## 5. Recursion vs iteration
 

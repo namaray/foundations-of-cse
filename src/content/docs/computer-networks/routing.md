@@ -71,7 +71,7 @@ These fix two-node loops but not every longer loop.
 
 1. Each router learns the cost of its links to its neighbours.
 2. It **floods** a **link-state advertisement** (LSA) describing them to **every** router in the network.
-3. Every router then has the **complete map** and runs [Dijkstra's algorithm](/algorithms/shortest-paths/#dijkstras-algorithm) to compute shortest paths from itself.
+3. Every router then has the **complete map** and runs [Dijkstra's algorithm](/algorithms/shortest-paths/#2-dijkstras-algorithm) to compute shortest paths from itself.
 
 ## 4. Distance vector vs link state
 

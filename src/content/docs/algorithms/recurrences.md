@@ -6,11 +6,21 @@ sidebar:
   order: 1
 lesson:
   module: Foundations
+  prerequisites:
+    - label: Complexity analysis
+      link: /data-structures/complexity-analysis/
+  outcomes:
+    - Prove an algorithm correct with a loop invariant
+    - Write the recurrence for a recursive algorithm
+    - Solve recurrences by iteration, recursion trees and substitution
+    - Apply the three cases of the Master theorem and recognise when it does not apply
+  keyIdea: >-
+    A recursive algorithm's running time is a **recurrence**, such as $T(n) = 2T(n/2) + n$. Solve it by unrolling, by adding up a **recursion tree** level by level, or by guessing and proving with induction. The **Master theorem** settles $T(n) = aT(n/b) + f(n)$ at once by comparing $f(n)$ with $n^{\log_b a}$.
 ---
 
 Asymptotic notation (Big-O, Ω, Θ) is covered in [Data Structures: Complexity Analysis](/data-structures/complexity-analysis/). This page covers the two other analysis skills every algorithms exam tests: **proving an algorithm correct** and **solving recurrences**.
 
-## Correctness with loop invariants
+## 1. Correctness with loop invariants
 
 A **loop invariant** is a statement that is true before every iteration of a loop. To prove an algorithm correct with one, show three things:
 
@@ -24,7 +34,7 @@ A **loop invariant** is a statement that is true before every iteration of a loo
 - Maintenance: the iteration shifts larger elements right and inserts `A[j]` in its place, so `A[0..j]` is sorted.
 - Termination: the loop ends with $j = n$, so `A[0..n-1]`, the whole array, is sorted.
 
-## Recurrences
+## 2. Recurrences
 
 A recursive algorithm's running time is naturally written as a **recurrence**: the cost on input size $n$ in terms of the cost on smaller inputs.
 
@@ -39,7 +49,7 @@ A recursive algorithm's running time is naturally written as a **recurrence**: t
 
 There are three standard ways to solve them.
 
-## 1. Iteration (unrolling)
+### Method 1: iteration (unrolling)
 
 Expand the recurrence until a pattern appears, then sum it.
 
@@ -55,19 +65,13 @@ $$
 T(n) = 2^{n-1} + 2^{n-2} + \dots + 2 + 1 = 2^n - 1 = \Theta(2^n)
 $$
 
-## 2. Recursion tree
+### Method 2: recursion tree
 
 Draw the tree of recursive calls, write the non-recursive cost at each node, add each level, then add the levels.
 
 **Example:** $T(n) = 2T(n/2) + cn$.
 
-```text
-Level 0:             cn                          → cn
-Level 1:       cn/2      cn/2                    → cn
-Level 2:   cn/4  cn/4  cn/4  cn/4                → cn
-  ...
-Level log n:  c  c  c  ...  c   (n leaves)       → cn
-```
+<figure class="diagram"><svg style="--dg-min:460px" class="dg" viewBox="0 0 580 270" role="img" aria-labelledby="rtree-t"><title id="rtree-t">Recursion tree for T(n) = 2T(n/2) + cn: every level costs cn in total, and there are log n + 1 levels.</title><defs><marker id="ah-rtree" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-rtree-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-a" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-rtree-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-b" d="M0,0 L10,5 L0,10 z"/></marker></defs><line class="dg-line" x1="230" y1="52" x2="125" y2="82"/><line class="dg-line" x1="230" y1="52" x2="335" y2="82"/><line class="dg-line" x1="125" y1="114" x2="72.5" y2="144"/><line class="dg-line" x1="125" y1="114" x2="177.5" y2="144"/><line class="dg-line" x1="335" y1="114" x2="282.5" y2="144"/><line class="dg-line" x1="335" y1="114" x2="387.5" y2="144"/><rect class="dg-cell-a" x="202" y="20" width="56" height="32" rx="4"/><text class="dg-t-a" x="230" y="36" text-anchor="middle" style="font-size:14px">cn</text><text class="dg-t-c" x="470" y="36">= cn</text><rect class="dg-cell" x="97" y="82" width="56" height="32" rx="4"/><text x="125" y="98" text-anchor="middle" style="font-size:14px">cn/2</text><rect class="dg-cell" x="307" y="82" width="56" height="32" rx="4"/><text x="335" y="98" text-anchor="middle" style="font-size:14px">cn/2</text><text class="dg-t-c" x="470" y="98">= cn</text><rect class="dg-cell" x="47.5" y="144" width="50" height="32" rx="4"/><text x="72.5" y="160" text-anchor="middle" style="font-size:14px">cn/4</text><rect class="dg-cell" x="152.5" y="144" width="50" height="32" rx="4"/><text x="177.5" y="160" text-anchor="middle" style="font-size:14px">cn/4</text><rect class="dg-cell" x="257.5" y="144" width="50" height="32" rx="4"/><text x="282.5" y="160" text-anchor="middle" style="font-size:14px">cn/4</text><rect class="dg-cell" x="362.5" y="144" width="50" height="32" rx="4"/><text x="387.5" y="160" text-anchor="middle" style="font-size:14px">cn/4</text><text class="dg-t-c" x="470" y="160">= cn</text><text class="dg-t-muted" x="230" y="204" text-anchor="middle">⋮</text><rect class="dg-cell-c" x="26" y="214" width="34" height="30" rx="4"/><text class="dg-t-c" x="43" y="229" text-anchor="middle" style="font-size:13px">c</text><rect class="dg-cell-c" x="67" y="214" width="34" height="30" rx="4"/><text class="dg-t-c" x="84" y="229" text-anchor="middle" style="font-size:13px">c</text><rect class="dg-cell-c" x="108" y="214" width="34" height="30" rx="4"/><text class="dg-t-c" x="125" y="229" text-anchor="middle" style="font-size:13px">c</text><rect class="dg-cell-c" x="149" y="214" width="34" height="30" rx="4"/><text class="dg-t-c" x="166" y="229" text-anchor="middle" style="font-size:13px">c</text><rect class="dg-cell-c" x="190" y="214" width="34" height="30" rx="4"/><text class="dg-t-c" x="207" y="229" text-anchor="middle" style="font-size:13px">c</text><rect class="dg-cell-c" x="231" y="214" width="34" height="30" rx="4"/><text class="dg-t-c" x="248" y="229" text-anchor="middle" style="font-size:13px">c</text><rect class="dg-cell-c" x="272" y="214" width="34" height="30" rx="4"/><text class="dg-t-c" x="289" y="229" text-anchor="middle" style="font-size:13px">c</text><rect class="dg-cell-c" x="313" y="214" width="34" height="30" rx="4"/><text class="dg-t-c" x="330" y="229" text-anchor="middle" style="font-size:13px">c</text><rect class="dg-cell-c" x="354" y="214" width="34" height="30" rx="4"/><text class="dg-t-c" x="371" y="229" text-anchor="middle" style="font-size:13px">c</text><rect class="dg-cell-c" x="395" y="214" width="34" height="30" rx="4"/><text class="dg-t-c" x="412" y="229" text-anchor="middle" style="font-size:13px">c</text><text class="dg-t-c" x="470" y="229">= cn</text><text class="dg-t-muted" x="230" y="262" text-anchor="middle">n leaves, each costing c</text><text class="dg-t-muted" x="470" y="6">level total</text></svg><ul class="dg-legend"><li><span class="dg-swatch a"></span>top-level call</li><li><span class="dg-swatch c"></span>level cost and leaves</li></ul><figcaption>Write each call&#x27;s own (non-recursive) cost, add across each level, then add the levels. Here every level sums to cn and there are log₂ n + 1 levels, so T(n) = Θ(n log n).</figcaption></figure>
 
 Each of the $\log_2 n + 1$ levels costs $cn$, so $T(n) = \Theta(n \log n)$.
 
@@ -81,7 +85,7 @@ $$
 If the level costs **shrink** geometrically, the root dominates. If they **grow**, the leaves dominate. If they are **equal**, multiply one level's cost by the number of levels.
 :::
 
-## 3. Substitution
+### Method 3: substitution
 
 Guess the answer, then prove it by induction.
 
@@ -95,7 +99,7 @@ $$
 
 whenever $c \ge 1$. Base cases are handled by choosing $c$ large enough.
 
-## The Master theorem
+## 3. The Master theorem
 
 For recurrences of the form
 
@@ -136,7 +140,15 @@ The extra condition in case 3 is the **regularity condition**. It holds for all 
 "Polynomially smaller" means smaller by a factor of $n^\varepsilon$. $n \log n$ is larger than $n$, but only by a log factor, which is case 2 with $k = 1$, not case 3.
 :::
 
-## Viva questions
+## Summary
+
+- Loop invariant proofs: initialisation, maintenance, termination.
+- Iteration: unroll and sum. $T(n) = T(n - 1) + n$ gives $\Theta(n^2)$; $2T(n - 1) + 1$ gives $\Theta(2^n)$.
+- Recursion tree: add each level; shrinking levels → root dominates, growing → leaves dominate, equal → level cost × number of levels.
+- Master theorem: compare $f(n)$ with $n^{\log_b a}$. Smaller → $\Theta(n^{\log_b a})$; equal (× $\log^k n$) → multiply by $\log n$; larger (with regularity) → $\Theta(f(n))$.
+- It doesn't apply to unequal splits, subtraction recurrences, or gaps such as $n/\log n$.
+
+## Check yourself
 
 <details>
 <summary>What is a loop invariant, and why is it useful?</summary>

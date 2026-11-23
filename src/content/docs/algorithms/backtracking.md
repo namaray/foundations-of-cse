@@ -6,17 +6,27 @@ sidebar:
   order: 12
 lesson:
   module: Further topics
+  prerequisites:
+    - label: Graph traversal (DFS)
+      link: /algorithms/graph-traversal/
+  outcomes:
+    - Describe a state-space tree and how pruning shrinks it
+    - Solve N-Queens, subset sum and graph colouring by backtracking
+    - Use bounds to prune in branch and bound for knapsack and TSP
+    - Compare backtracking, branch and bound and brute force
+  keyIdea: >-
+    When no fast algorithm is known, search the **state-space tree** of partial solutions, but **prune** early. **Backtracking** abandons a partial solution as soon as it breaks a constraint. **Branch and bound** also abandons any branch whose optimistic **bound** can't beat the best solution found so far. Still exponential in the worst case, but often fast in practice.
 ---
 
 Some problems have no known fast algorithm, so we must search through possible solutions. **Backtracking** and **branch and bound** search systematically and **prune** branches that cannot lead to a (better) solution, which is often far faster than trying everything.
 
-## The state-space tree
+## 1. The state-space tree
 
 Both techniques explore a **state-space tree**: the root is the empty solution, and each level fixes one more decision (which column the next queen goes in, whether to take the next item, and so on). Leaves are complete candidate solutions.
 
 Brute force visits every leaf. Pruning cuts off whole subtrees early.
 
-## Backtracking
+## 2. Backtracking
 
 Build the solution one decision at a time, depth first. As soon as a partial solution **violates a constraint**, abandon it and go back (*backtrack*) to try the next option at the previous level.
 
@@ -54,13 +64,7 @@ void solve(int r) {
 
 **4-Queens** has exactly two solutions. Listing the column of the queen in each row (1-indexed): **(2, 4, 1, 3)** and **(3, 1, 4, 2)**.
 
-```text
-Solution (2, 4, 1, 3)
-. Q . .
-. . . Q
-Q . . .
-. . Q .
-```
+<figure class="diagram"><svg style="--dg-min:240px" class="dg" viewBox="0 0 240 220" role="img" aria-labelledby="queens-t"><title id="queens-t">A solution to 4-Queens: queens in columns 2, 4, 1, 3 of rows 1 to 4.</title><defs><marker id="ah-queens" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-queens-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-a" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-queens-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-head-b" d="M0,0 L10,5 L0,10 z"/></marker></defs><text class="dg-t-muted" x="30" y="52" text-anchor="middle">1</text><rect class="dg-cell" x="50" y="30" width="44" height="44" rx="0"/><rect class="dg-cell-b" x="94" y="30" width="44" height="44" rx="0"/><text class="dg-t-b" x="116" y="52" text-anchor="middle" style="font-size:24px">♛</text><rect class="dg-cell" x="138" y="30" width="44" height="44" rx="0"/><rect class="dg-cell-dim" x="182" y="30" width="44" height="44" rx="0"/><text class="dg-t-muted" x="30" y="96" text-anchor="middle">2</text><rect class="dg-cell-dim" x="50" y="74" width="44" height="44" rx="0"/><rect class="dg-cell" x="94" y="74" width="44" height="44" rx="0"/><rect class="dg-cell-dim" x="138" y="74" width="44" height="44" rx="0"/><rect class="dg-cell-b" x="182" y="74" width="44" height="44" rx="0"/><text class="dg-t-b" x="204" y="96" text-anchor="middle" style="font-size:24px">♛</text><text class="dg-t-muted" x="30" y="140" text-anchor="middle">3</text><rect class="dg-cell-b" x="50" y="118" width="44" height="44" rx="0"/><text class="dg-t-b" x="72" y="140" text-anchor="middle" style="font-size:24px">♛</text><rect class="dg-cell-dim" x="94" y="118" width="44" height="44" rx="0"/><rect class="dg-cell" x="138" y="118" width="44" height="44" rx="0"/><rect class="dg-cell-dim" x="182" y="118" width="44" height="44" rx="0"/><text class="dg-t-muted" x="30" y="184" text-anchor="middle">4</text><rect class="dg-cell-dim" x="50" y="162" width="44" height="44" rx="0"/><rect class="dg-cell" x="94" y="162" width="44" height="44" rx="0"/><rect class="dg-cell-b" x="138" y="162" width="44" height="44" rx="0"/><text class="dg-t-b" x="160" y="184" text-anchor="middle" style="font-size:24px">♛</text><rect class="dg-cell" x="182" y="162" width="44" height="44" rx="0"/><text class="dg-t-muted" x="72" y="14" text-anchor="middle">1</text><text class="dg-t-muted" x="116" y="14" text-anchor="middle">2</text><text class="dg-t-muted" x="160" y="14" text-anchor="middle">3</text><text class="dg-t-muted" x="204" y="14" text-anchor="middle">4</text></svg><ul class="dg-legend"><li><span class="dg-swatch b"></span>queen</li></ul><figcaption>The solution (2, 4, 1, 3): one queen per row, and no two share a column or a diagonal. The other solution, (3, 1, 4, 2), is its mirror image.</figcaption></figure>
 
 Without pruning there are $4^4 = 256$ placements to check (one queen per row). Backtracking visits only a few dozen nodes.
 
@@ -80,7 +84,7 @@ Find a cycle that visits every vertex exactly once. Extend the path one vertex a
 
 Backtracking is still exponential in the worst case, since these problems are [NP-complete](/algorithms/np-completeness/), but pruning makes it practical for moderate sizes.
 
-## Branch and bound
+## 3. Branch and bound
 
 Branch and bound is used for **optimisation** problems (find the *best* solution, not just any valid one). At each node it computes a **bound**: an optimistic estimate of the best solution reachable from that node.
 
@@ -91,13 +95,13 @@ Nodes are often explored **best-first**, taking the node with the most promising
 
 ### 0/1 knapsack
 
-Branch on *take* or *skip* for each item, with items sorted by value per weight. The **upper bound** at a node is the current value plus the value of the [fractional knapsack](/algorithms/greedy/#fractional-knapsack) solution for the remaining capacity, which can never be beaten by a 0/1 choice. Prune any node whose bound is not better than the best value found so far.
+Branch on *take* or *skip* for each item, with items sorted by value per weight. The **upper bound** at a node is the current value plus the value of the [fractional knapsack](/algorithms/greedy/#3-fractional-knapsack) solution for the remaining capacity, which can never be beaten by a 0/1 choice. Prune any node whose bound is not better than the best value found so far.
 
 ### Travelling salesman problem
 
 Find the cheapest tour visiting every city once and returning to the start. A common **lower bound** comes from the **reduced cost matrix**: subtract each row's minimum and then each column's minimum; the total subtracted is a lower bound on any tour. Branch on which city to visit next, updating the matrix and the bound, and prune nodes whose bound exceeds the best tour found.
 
-## Backtracking vs branch and bound
+## 4. Backtracking vs branch and bound
 
 | | Backtracking | Branch and bound |
 |---|---|---|
@@ -106,7 +110,15 @@ Find the cheapest tour visiting every city once and returning to the start. A co
 | Search order | Depth-first | Often best-first (priority queue), or BFS/DFS |
 | Examples | N-Queens, subset sum, graph colouring, Sudoku | 0/1 knapsack, TSP, job assignment |
 
-## Viva questions
+## Summary
+
+- State-space tree: each level fixes one decision; leaves are complete candidates.
+- Backtracking: depth-first, prune on constraint violation (N-Queens, subset sum, colouring, Hamiltonian cycle).
+- 4-Queens has two solutions, (2, 4, 1, 3) and (3, 1, 4, 2).
+- Branch and bound: for optimisation; prune when the bound can't beat the best so far; often best-first.
+- Knapsack bound from the fractional relaxation; TSP bound from the reduced cost matrix.
+
+## Check yourself
 
 <details>
 <summary>What is the difference between backtracking and brute force?</summary>

@@ -54,7 +54,7 @@ Expand the **shallowest** node first; the frontier is a **FIFO queue**.
 
 ## 4. Uniform-cost search (UCS)
 
-Expand the node with the **lowest path cost** $g(n)$; the frontier is a **priority queue**. This is [Dijkstra's algorithm](/algorithms/shortest-paths/#dijkstras-algorithm) stopped at the goal.
+Expand the node with the **lowest path cost** $g(n)$; the frontier is a **priority queue**. This is [Dijkstra's algorithm](/algorithms/shortest-paths/#2-dijkstras-algorithm) stopped at the goal.
 
 - Complete and **optimal** for any positive step costs.
 - The goal test must be applied when a node is **expanded**, not when it is generated, or a cheaper path found later would be missed.
