@@ -9,10 +9,13 @@ lesson:
   outcomes:
     - Use the vocabulary of alphabets, strings and languages correctly
     - Give the formal 5-tuple definition of a DFA
+    - Trace a DFA on an input string and decide whether it is accepted
     - Design a DFA for patterns such as "ends with", "contains" and "divisible by"
   keyIdea: >-
     A **DFA** reads a string one symbol at a time, moving between a finite number of states, and accepts if it ends in an accepting state. Each state stands for **what you need to remember** about the input so far; designing a DFA means choosing those states.
 ---
+
+import AutomatonSim from '../../../components/sims/AutomatonSim.astro';
 
 ## 1. Strings and languages
 
@@ -79,7 +82,15 @@ $$
 
 The same idea gives a DFA for divisibility by any $k$, with $k$ states.
 
-## 5. Design patterns
+## 5. Step through a DFA
+
+Pick a machine, then press **Step** to feed the input one symbol at a time. The highlighted state is where the DFA is now, the highlighted arrow and table cell are the move it just made, and the amber box on the tape is the next symbol to read. Type your own strings to test your understanding: predict the answer first, then run it.
+
+<AutomatonSim examples={['dfa-ends-01', 'dfa-div-3', 'dfa-contains-aba']} />
+
+Notice that a DFA never has a choice: from each state, each symbol has exactly **one** arrow, so there is exactly one path for every input.
+
+## 6. Design patterns
 
 | Language over $\{a, b\}$ | Idea | States |
 |---|---|---|
@@ -111,19 +122,19 @@ A **dead (trap) state** is a non-accepting state that loops to itself on every s
 ## Check yourself
 
 <details>
-<summary>How many states does the minimal DFA for "strings over {a, b} of length at least 2" need?</summary>
+<summary>How many states does the minimal DFA for "strings over &#123;a, b&#125; of length at least 2" need?</summary>
 
 3: length 0, length 1, and length 2 or more (accepting, looping on both symbols).
 </details>
 
 <details>
-<summary>Is ∅ the same language as {ε}?</summary>
+<summary>Is ∅ the same language as &#123;ε&#125;?</summary>
 
 No. $\emptyset$ contains no strings; $\{\varepsilon\}$ contains exactly one string, the empty one.
 </details>
 
 <details>
-<summary>Why can't a DFA recognise {aⁿbⁿ : n ≥ 0}?</summary>
+<summary>Why can't a DFA recognise &#123;aⁿbⁿ : n ≥ 0&#125;?</summary>
 
 It would need to remember how many $a$'s it has seen, which can be any number, but it has only finitely many states. The [pumping lemma](/theory-of-computation/regular-properties/) makes this precise.
 </details>

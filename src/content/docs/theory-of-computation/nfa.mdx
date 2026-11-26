@@ -11,11 +11,14 @@ lesson:
       link: /theory-of-computation/finite-automata/
   outcomes:
     - Design small NFAs, including ones with ε-moves
+    - Trace an NFA by tracking the set of states it could be in
     - Compute the ε-closure of a set of states
     - Convert an NFA to an equivalent DFA with the subset construction
   keyIdea: >-
     An **NFA** may have zero, one or many moves on a symbol, and free **ε-moves**; it accepts if **any** path ends in an accepting state. NFAs are often much easier to design, but no more powerful: the **subset construction** turns any NFA into a DFA whose states are sets of NFA states.
 ---
+
+import AutomatonSim from '../../../components/sims/AutomatonSim.astro';
 
 ## 1. What changes in an NFA
 
@@ -76,11 +79,21 @@ Only 3 of the $2^3 = 8$ possible subsets are reachable, and the result matches t
 Build the table **lazily**: only add a subset when it appears as a target. Include $\emptyset$ as a dead state if it shows up.
 :::
 
-## 4. How big can the DFA get?
+## 4. Step through an NFA
+
+An NFA can be in **several states at once**. The simulator tracks the whole set: every state highlighted is a place some path could be. A path that has no move simply disappears; if the set becomes empty, every path has died. The string is accepted if the final set contains **any** accepting state.
+
+Try **a\*b\* (with ε)** to watch ε-closure at work: the machine starts in $\{p, q\}$ because $q$ is reachable from $p$ for free. Try **3rd from end is 1** on a long string to see how many states can be active together.
+
+Below the simulator, build the **subset construction** for the same NFA one row at a time. Each set the simulation passes through is exactly one row of that DFA, outlined in the table as you step.
+
+<AutomatonSim examples={['nfa-ends-01', 'nfa-a-star-b-star', 'nfa-third-from-end']} />
+
+## 5. How big can the DFA get?
 
 An NFA with $n$ states can need a DFA with up to $2^n$ states. The classic example is "the $n$-th symbol from the end is 1": an NFA with $n + 1$ states, but the DFA must remember the last $n$ symbols, needing $2^n$ states. In practice the reachable part is usually small.
 
-## 5. Equivalence
+## 6. Equivalence
 
 **Theorem.** A language is accepted by some NFA if and only if it is accepted by some DFA.
 

@@ -1,0 +1,559 @@
+---
+// Step-through simulator for DFAs and NFAs (with ε-moves).
+// Draws the state diagram, an input tape, the transition table and a trace,
+// and for NFAs also builds the subset construction one row at a time.
+import { machines } from './automata';
+
+interface Props {
+	examples: string[];
+	subset?: boolean; // NFA only: show the subset-construction panel
+}
+const { examples, subset = true } = Astro.props;
+const list = examples.map((id) => machines[id]).filter(Boolean);
+const isNfa = list.some((m) => m.kind === 'nfa');
+---
+
+<div class="automaton-sim not-content" data-machines={JSON.stringify(list)} data-subset={subset ? '1' : '0'}>
+	<div class="as-top">
+		<div class="as-chips" role="group" aria-label="Choose a machine">
+			{list.map((m, i) => (
+				<button type="button" data-id={m.id} aria-pressed={i === 0 ? 'true' : 'false'}>{m.name}</button>
+			))}
+		</div>
+		<p class="as-lang"></p>
+	</div>
+
+	<div class="as-diagram">
+		<svg class="dg as-svg" viewBox="0 0 560 230" role="img"></svg>
+	</div>
+
+	<div class="as-tape-row">
+		<span class="as-label">Input</span>
+		<div class="as-tape" role="list" aria-label="Input tape"></div>
+	</div>
+
+	<div class="as-controls">
+		<label class="as-field">
+			<span>Type a string</span>
+			<input class="as-input" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" maxlength="24" />
+		</label>
+		<div class="as-samples" role="group" aria-label="Try a sample string"></div>
+	</div>
+	<div class="as-buttons">
+		<button type="button" data-act="reset" title="Back to the start">Reset</button>
+		<button type="button" data-act="back" title="Undo one symbol">← Back</button>
+		<button type="button" data-act="step" class="primary" title="Read the next symbol">Step →</button>
+		<button type="button" data-act="play">Play</button>
+		<button type="button" data-act="end" title="Read the whole string">Run to end</button>
+	</div>
+
+	<p class="as-status" aria-live="polite"></p>
+	<p class="as-notes"></p>
+
+	<div class="as-cols">
+		<div>
+			<h4 class="as-h">Transition table</h4>
+			<div class="as-table-wrap"><table class="as-table"></table></div>
+			<p class="as-hint">→ start state, * accepting state. The highlighted cells are the moves just used.</p>
+		</div>
+		<div>
+			<h4 class="as-h">Trace</h4>
+			<ol class="as-trace"></ol>
+		</div>
+	</div>
+
+	{isNfa && subset && (
+		<section class="as-subset" hidden>
+			<h4 class="as-h">Subset construction: the equivalent DFA</h4>
+			<p class="as-hint">Each DFA state is a <strong>set</strong> of NFA states: everywhere the NFA could be. Build the table one row at a time, starting from the start state's ε-closure. The row matching the simulation above is outlined.</p>
+			<div class="as-table-wrap"><table class="as-sub-table"></table></div>
+			<p class="as-sub-status" aria-live="polite"></p>
+			<div class="as-buttons">
+				<button type="button" data-sub="next" class="primary">Add next row</button>
+				<button type="button" data-sub="all">Show all rows</button>
+				<button type="button" data-sub="reset">Start over</button>
+			</div>
+		</section>
+	)}
+</div>
+
+<script>
+	type Machine = import('./automata').Machine;
+	const EPS = 'ε';
+	const SVGNS = 'http://www.w3.org/2000/svg';
+	let uid = 0;
+
+	function el<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string | number> = {}) {
+		const e = document.createElementNS(SVGNS, tag);
+		for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, String(v));
+		return e;
+	}
+
+	function setup(root: HTMLElement) {
+		const list: Machine[] = JSON.parse(root.dataset.machines || '[]');
+		const id = `as${uid++}`;
+		const svg = root.querySelector<SVGSVGElement>('.as-svg')!;
+		const tape = root.querySelector<HTMLElement>('.as-tape')!;
+		const input = root.querySelector<HTMLInputElement>('.as-input')!;
+		const samples = root.querySelector<HTMLElement>('.as-samples')!;
+		const status = root.querySelector<HTMLElement>('.as-status')!;
+		const notesEl = root.querySelector<HTMLElement>('.as-notes')!;
+		const table = root.querySelector<HTMLTableElement>('.as-table')!;
+		const trace = root.querySelector<HTMLOListElement>('.as-trace')!;
+		const lang = root.querySelector<HTMLElement>('.as-lang')!;
+		const playBtn = root.querySelector<HTMLButtonElement>('[data-act="play"]')!;
+		const subSec = root.querySelector<HTMLElement>('.as-subset');
+
+		let m: Machine = list[0];
+		let order: string[] = [];
+		let w = '';
+		let i = 0;
+		let configs: string[][] = [];
+		let steps: { used: [string, string][]; eps: [string, string][] }[] = [];
+		let startEps: [string, string][] = [];
+		let timer: number | undefined;
+		let nodes: Record<string, { g: SVGGElement; shapes: SVGCircleElement[]; text: SVGTextElement }> = {};
+		let edges: Record<string, { path: SVGPathElement; label: SVGTextElement }> = {};
+		let subRows: { set: string[]; next: Record<string, string[]>; explain: string[] }[] = [];
+		let subShown = 0;
+
+		const sortSet = (s: Iterable<string>) => [...new Set(s)].sort((a, b) => order.indexOf(a) - order.indexOf(b));
+		const fmt = (s: string[]) => (s.length ? `{${s.join(', ')}}` : '∅');
+		const move = (q: string, a: string) => m.delta[q]?.[a] ?? [];
+		const hasEps = () => order.some((q) => move(q, EPS).length);
+
+		function close(set: string[]) {
+			const seen = new Set(set);
+			const stack = [...set];
+			const used: [string, string][] = [];
+			while (stack.length) {
+				const q = stack.pop()!;
+				for (const t of move(q, EPS)) {
+					used.push([q, t]);
+					if (!seen.has(t)) { seen.add(t); stack.push(t); }
+				}
+			}
+			return { set: sortSet(seen), used };
+		}
+
+		function compute() {
+			const c0 = close([m.start]);
+			configs = [c0.set];
+			startEps = c0.used;
+			steps = [];
+			for (const a of w) {
+				const cur = configs[configs.length - 1];
+				const used: [string, string][] = [];
+				const next: string[] = [];
+				for (const q of cur) for (const t of move(q, a)) { used.push([q, t]); next.push(t); }
+				const c = close(next);
+				configs.push(c.set);
+				steps.push({ used, eps: c.used });
+			}
+		}
+
+		// ---------- drawing ----------
+		function draw() {
+			svg.replaceChildren();
+			nodes = {};
+			edges = {};
+			const defs = el('defs');
+			for (const k of ['', '-b']) {
+				const mk = el('marker', { id: `${id}-ah${k}`, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' });
+				mk.append(el('path', { class: `dg-head${k}`, d: 'M0,0 L10,5 L0,10 z' }));
+				defs.append(mk);
+			}
+			svg.append(defs);
+			const edgeLayer = el('g');
+			const nodeLayer = el('g');
+			svg.append(edgeLayer, nodeLayer);
+			const R = 24;
+
+			// group symbols by (from, to)
+			const groups = new Map<string, string[]>();
+			for (const q of order) for (const [a, ts] of Object.entries(m.delta[q] || {})) for (const t of ts) {
+				const key = `${q}>${t}`;
+				groups.set(key, [...(groups.get(key) || []), a]);
+			}
+			for (const [key, syms] of groups) {
+				const [p, q] = key.split('>');
+				const P = m.states[p], Q = m.states[q];
+				const labelText = syms.join(', ');
+				let d: string, lx: number, ly: number;
+				if (p === q) {
+					const below = P.loop === 'below';
+					const s = below ? 1 : -1;
+					d = `M${P.x - 10},${P.y + s * 22} C${P.x - 34},${P.y + s * 74} ${P.x + 34},${P.y + s * 74} ${P.x + 12},${P.y + s * 23}`;
+					lx = P.x; ly = P.y + s * 70;
+				} else {
+					const dx = Q.x - P.x, dy = Q.y - P.y, L = Math.hypot(dx, dy);
+					const ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
+					const bend = m.bend?.[key] ?? 0;
+					const mx = (P.x + Q.x) / 2 + nx * bend * 2, my = (P.y + Q.y) / 2 + ny * bend * 2;
+					const toC = (X: { x: number; y: number }, r: number) => {
+						const vx = mx - X.x, vy = my - X.y, l = Math.hypot(vx, vy);
+						return [X.x + (vx / l) * r, X.y + (vy / l) * r];
+					};
+					const [sx, sy] = toC(P, R);
+					const [ex, ey] = toC(Q, R + 3);
+					d = `M${sx},${sy} Q${mx},${my} ${ex},${ey}`;
+					const ax = (P.x + Q.x) / 2 + nx * bend, ay = (P.y + Q.y) / 2 + ny * bend;
+					const side = bend === 0 ? -1 : Math.sign(bend);
+					lx = ax + nx * 13 * side; ly = ay + ny * 13 * side;
+				}
+				const path = el('path', { class: 'dg-line', d, 'marker-end': `url(#${id}-ah)` });
+				const label = el('text', { x: lx, y: ly, 'text-anchor': 'middle', class: 'as-elabel' });
+				label.textContent = labelText;
+				edgeLayer.append(path);
+				nodeLayer.append(label);
+				edges[key] = { path, label };
+			}
+			// start arrow
+			const S = m.states[m.start];
+			edgeLayer.append(el('path', { class: 'dg-line', d: `M${S.x - 62},${S.y} L${S.x - R - 3},${S.y}`, 'marker-end': `url(#${id}-ah)` }));
+			const st = el('text', { x: S.x - 64, y: S.y - 12, class: 'dg-t-muted' });
+			st.textContent = 'start';
+			nodeLayer.append(st);
+
+			for (const q of order) {
+				const { x, y } = m.states[q];
+				const g = el('g');
+				const shapes = [el('circle', { cx: x, cy: y, r: R, class: 'dg-cell' })];
+				if (m.accept.includes(q)) shapes.push(el('circle', { cx: x, cy: y, r: R - 5, class: 'dg-cell' }));
+				const text = el('text', { x, y, 'text-anchor': 'middle' });
+				text.textContent = q;
+				g.append(...shapes, text);
+				nodeLayer.append(g);
+				nodes[q] = { g, shapes, text };
+			}
+			const desc = `${m.kind.toUpperCase()} with states ${order.join(', ')}; start ${m.start}; accepting ${m.accept.join(', ')}.`;
+			svg.setAttribute('aria-label', desc);
+		}
+
+		function drawTable() {
+			const syms = [...m.alphabet, ...(hasEps() ? [EPS] : [])];
+			const head = `<thead><tr><th scope="col">State</th>${syms.map((a) => `<th scope="col">on ${a}</th>`).join('')}</tr></thead>`;
+			const body = order.map((q) => {
+				const mark = `${q === m.start ? '→ ' : ''}${m.accept.includes(q) ? '* ' : ''}`;
+				const cells = syms.map((a) => {
+					const ts = move(q, a);
+					const txt = m.kind === 'dfa' ? ts[0] ?? '—' : fmt(ts);
+					return `<td data-q="${q}" data-a="${a}">${txt}</td>`;
+				}).join('');
+				return `<tr data-row="${q}"><th scope="row">${mark}${q}</th>${cells}</tr>`;
+			}).join('');
+			table.innerHTML = head + `<tbody>${body}</tbody>`;
+		}
+
+		// ---------- updating ----------
+		function update() {
+			const cur = configs[i];
+			const done = i === w.length;
+			const accepted = cur.some((q) => m.accept.includes(q));
+			const last = i > 0 ? steps[i - 1] : { used: [], eps: startEps };
+
+			for (const q of order) {
+				const on = cur.includes(q);
+				let cls = 'dg-cell';
+				if (on) cls = done ? (accepted ? 'dg-cell-c' : 'dg-cell-b as-reject') : 'dg-cell-b';
+				for (const s of nodes[q].shapes) s.setAttribute('class', cls);
+				nodes[q].text.setAttribute('class', on ? (done ? (accepted ? 'dg-t-c' : 'as-t-reject') : 'dg-t-b') : '');
+			}
+			const hot = new Set([...last.used, ...last.eps].map(([a, b]) => `${a}>${b}`));
+			for (const [key, e] of Object.entries(edges)) {
+				const on = hot.has(key);
+				e.path.setAttribute('class', on ? 'dg-line-b' : 'dg-line');
+				e.path.setAttribute('marker-end', `url(#${id}-ah${on ? '-b' : ''})`);
+				e.label.setAttribute('class', on ? 'as-elabel dg-t-b' : 'as-elabel');
+			}
+
+			// tape
+			tape.replaceChildren();
+			if (!w.length) {
+				const c = document.createElement('span');
+				c.className = 'as-cell as-empty';
+				c.textContent = 'ε (empty string)';
+				tape.append(c);
+			}
+			[...w].forEach((ch, k) => {
+				const c = document.createElement('span');
+				c.setAttribute('role', 'listitem');
+				c.className = 'as-cell' + (k < i ? ' read' : '') + (k === i ? ' next' : '');
+				c.textContent = ch;
+				if (k === i) c.setAttribute('aria-current', 'true');
+				tape.append(c);
+			});
+
+			// table highlights
+			table.querySelectorAll('td, tr').forEach((n) => n.classList.remove('hot', 'cur'));
+			if (i > 0) {
+				const a = w[i - 1];
+				for (const q of configs[i - 1]) table.querySelector(`td[data-q="${q}"][data-a="${a}"]`)?.classList.add('hot');
+			}
+			for (const q of cur) table.querySelector(`tr[data-row="${q}"]`)?.classList.add('cur');
+
+			// status
+			const where = m.kind === 'dfa' ? cur[0] : fmt(cur);
+			let msg = '';
+			if (i === 0) {
+				msg = m.kind === 'dfa' ? `Start in ${m.start}.` : `Start in ${fmt(configs[0])}${startEps.length ? ` (${m.start} plus everything reachable by ε-moves)` : ''}.`;
+			} else {
+				const a = w[i - 1];
+				const prev = configs[i - 1];
+				if (m.kind === 'dfa') msg = `Read ${a}: ${prev[0]} → ${cur[0]}.`;
+				else {
+					const raw = sortSet(steps[i - 1].used.map(([, t]) => t));
+					msg = `Read ${a}: from ${fmt(prev)} the NFA can move to ${fmt(raw)}.`;
+					if (steps[i - 1].eps.length && raw.length !== cur.length) msg += ` ε-moves add ${fmt(cur.filter((q) => !raw.includes(q)))}, giving ${fmt(cur)}.`;
+					if (!cur.length) msg += ' No moves are possible, so every path has died.';
+				}
+			}
+			if (done) {
+				if (m.kind === 'dfa') msg += accepted ? ` Input finished in ${where}, an accepting state: ACCEPTED.` : ` Input finished in ${where}, which is not accepting: REJECTED.`;
+				else msg += accepted
+					? ` Input finished. ${fmt(cur)} contains the accepting state ${cur.filter((q) => m.accept.includes(q)).join(', ')}, so at least one path accepts: ACCEPTED.`
+					: ` Input finished. ${fmt(cur)} contains no accepting state, so no path accepts: REJECTED.`;
+			} else {
+				msg += ` Next symbol: ${w[i]}.`;
+			}
+			status.textContent = msg;
+			status.className = 'as-status' + (done ? (accepted ? ' ok' : ' bad') : '');
+
+			// what the current states remember
+			notesEl.textContent = m.notes && cur.length
+				? `${cur.length > 1 ? 'Possible states' : 'Current state'}: ` + cur.map((q) => `${q} = ${m.notes![q] ?? ''}`).join('; ')
+				: '';
+
+			// trace
+			trace.replaceChildren();
+			for (let k = 0; k <= i; k++) {
+				const li = document.createElement('li');
+				const s = m.kind === 'dfa' ? configs[k][0] : fmt(configs[k]);
+				li.innerHTML = k === 0 ? `start: <strong>${s}</strong>` : `read <code>${w[k - 1]}</code> → <strong>${s}</strong>`;
+				trace.append(li);
+			}
+
+			root.querySelector<HTMLButtonElement>('[data-act="back"]')!.disabled = i === 0;
+			root.querySelector<HTMLButtonElement>('[data-act="reset"]')!.disabled = i === 0;
+			root.querySelector<HTMLButtonElement>('[data-act="step"]')!.disabled = done;
+			root.querySelector<HTMLButtonElement>('[data-act="end"]')!.disabled = done;
+			playBtn.disabled = done && !timer;
+			markSubsetRow();
+		}
+
+		function stop() {
+			if (timer) { clearInterval(timer); timer = undefined; }
+			playBtn.textContent = 'Play';
+		}
+
+		function load(str: string) {
+			stop();
+			w = str;
+			input.value = str;
+			i = 0;
+			compute();
+			update();
+		}
+
+		function choose(machine: Machine) {
+			stop();
+			m = machine;
+			order = Object.keys(m.states);
+			lang.innerHTML = `<strong>${m.kind === 'dfa' ? 'DFA' : 'NFA'}</strong> accepting ${m.language}. Alphabet: {${m.alphabet.join(', ')}}.`;
+			root.querySelectorAll<HTMLButtonElement>('.as-chips button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === m.id)));
+			samples.replaceChildren();
+			for (const s of m.samples) {
+				const b = document.createElement('button');
+				b.type = 'button';
+				b.textContent = s === '' ? 'ε' : s;
+				b.addEventListener('click', () => load(s));
+				samples.append(b);
+			}
+			draw();
+			drawTable();
+			buildSubset();
+			load(m.samples[0]);
+		}
+
+		// ---------- subset construction ----------
+		function buildSubset() {
+			if (!subSec) return;
+			subSec.hidden = m.kind !== 'nfa';
+			subRows = [];
+			subShown = 0;
+			if (m.kind !== 'nfa') return;
+			const keyOf = (s: string[]) => s.join(',');
+			const seen = new Set<string>();
+			const queue = [close([m.start]).set];
+			seen.add(keyOf(queue[0]));
+			while (queue.length) {
+				const S = queue.shift()!;
+				const next: Record<string, string[]> = {};
+				const explain: string[] = [];
+				for (const a of m.alphabet) {
+					const raw = sortSet(S.flatMap((q) => move(q, a)));
+					const T = close(raw).set;
+					next[a] = T;
+					let line = S.length
+						? `on ${a}: ${S.map((q) => `δ(${q}, ${a})`).join(' ∪ ')} = ${S.map((q) => fmt(sortSet(move(q, a)))).join(' ∪ ')} = ${fmt(raw)}`
+						: `on ${a}: ∅`;
+					if (T.length !== raw.length) line += `, and its ε-closure is ${fmt(T)}`;
+					if (!seen.has(keyOf(T))) { seen.add(keyOf(T)); queue.push(T); line += ' (new)'; }
+					explain.push(line);
+				}
+				subRows.push({ set: S, next, explain });
+			}
+			renderSubset();
+		}
+
+		function renderSubset() {
+			if (!subSec) return;
+			const t = subSec.querySelector<HTMLTableElement>('.as-sub-table')!;
+			const head = `<thead><tr><th scope="col">DFA state</th>${m.alphabet.map((a) => `<th scope="col">on ${a}</th>`).join('')}</tr></thead>`;
+			const rows = subRows.slice(0, subShown).map((r, k) => {
+				const acc = r.set.some((q) => m.accept.includes(q));
+				const mark = `${k === 0 ? '→ ' : ''}${acc ? '* ' : ''}`;
+				return `<tr data-set="${r.set.join(',')}" class="${k === subShown - 1 ? 'fresh' : ''}"><th scope="row">${mark}${fmt(r.set)}</th>${m.alphabet.map((a) => `<td>${fmt(r.next[a])}</td>`).join('')}</tr>`;
+			}).join('');
+			t.innerHTML = head + `<tbody>${rows || `<tr><td colspan="${m.alphabet.length + 1}">Press “Add next row” to begin with the start state ${fmt(subRows[0].set)}.</td></tr>`}</tbody>`;
+			const st = subSec.querySelector<HTMLElement>('.as-sub-status')!;
+			if (subShown === 0) st.textContent = `Start state of the DFA: ECLOSE(${m.start}) = ${fmt(subRows[0].set)}.`;
+			else {
+				const r = subRows[subShown - 1];
+				st.textContent = `Row for ${fmt(r.set)}: ${r.explain.join('; ')}.` + (subShown === subRows.length
+					? ` Done: no new sets appear. The DFA has ${subRows.length} reachable states (out of ${2 ** order.length} possible subsets); a state is accepting if it contains ${m.accept.join(' or ')}.`
+					: '');
+			}
+			subSec.querySelector<HTMLButtonElement>('[data-sub="next"]')!.disabled = subShown === subRows.length;
+			subSec.querySelector<HTMLButtonElement>('[data-sub="all"]')!.disabled = subShown === subRows.length;
+			markSubsetRow();
+		}
+
+		function markSubsetRow() {
+			if (!subSec || m.kind !== 'nfa' || !configs.length) return;
+			const key = configs[i].join(',');
+			subSec.querySelectorAll('tr[data-set]').forEach((r) => r.classList.toggle('cur', (r as HTMLElement).dataset.set === key));
+		}
+
+		// ---------- events ----------
+		root.querySelectorAll<HTMLButtonElement>('.as-chips button').forEach((b) =>
+			b.addEventListener('click', () => choose(list.find((x) => x.id === b.dataset.id)!)));
+		input.addEventListener('input', () => {
+			const bad = [...input.value].filter((c) => !m.alphabet.includes(c));
+			if (bad.length) {
+				status.textContent = `“${bad[0]}” is not in the alphabet {${m.alphabet.join(', ')}}. Use only those symbols.`;
+				status.className = 'as-status bad';
+				return;
+			}
+			load(input.value);
+		});
+		root.querySelector('[data-act="reset"]')!.addEventListener('click', () => { stop(); i = 0; update(); });
+		root.querySelector('[data-act="back"]')!.addEventListener('click', () => { stop(); if (i > 0) { i--; update(); } });
+		root.querySelector('[data-act="step"]')!.addEventListener('click', () => { stop(); if (i < w.length) { i++; update(); } });
+		root.querySelector('[data-act="end"]')!.addEventListener('click', () => { stop(); i = w.length; update(); });
+		playBtn.addEventListener('click', () => {
+			if (timer) { stop(); update(); return; }
+			if (i === w.length) i = 0;
+			playBtn.textContent = 'Pause';
+			update();
+			timer = window.setInterval(() => {
+				if (i < w.length) { i++; update(); }
+				if (i >= w.length) { stop(); update(); }
+			}, 1000);
+		});
+		if (subSec) {
+			subSec.querySelector('[data-sub="next"]')!.addEventListener('click', () => { if (subShown < subRows.length) { subShown++; renderSubset(); } });
+			subSec.querySelector('[data-sub="all"]')!.addEventListener('click', () => { subShown = subRows.length; renderSubset(); });
+			subSec.querySelector('[data-sub="reset"]')!.addEventListener('click', () => { subShown = 0; renderSubset(); });
+		}
+
+		choose(m);
+	}
+
+	document.querySelectorAll<HTMLElement>('.automaton-sim').forEach(setup);
+</script>
+
+<style is:global>
+	.automaton-sim {
+		margin-block: 1.5rem;
+		padding: 1rem;
+		background: var(--cse-surface-2);
+		border: 1px solid var(--cse-border);
+		border-radius: 0.6rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-1);
+	}
+	.automaton-sim button {
+		font: inherit;
+		padding: 0.35rem 0.75rem;
+		border: 1px solid var(--cse-border);
+		border-radius: 0.4rem;
+		background: var(--cse-surface);
+		color: var(--sl-color-gray-1);
+		cursor: pointer;
+		min-height: 2.25rem;
+	}
+	.automaton-sim button:hover:not(:disabled) { border-color: var(--sl-color-accent); }
+	.automaton-sim button:focus-visible,
+	.automaton-sim input:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 2px; }
+	.automaton-sim button:disabled { opacity: 0.45; cursor: default; }
+	.automaton-sim button.primary { background: var(--sl-color-accent); border-color: var(--sl-color-accent); color: var(--sl-color-black); font-weight: 600; }
+	:root[data-theme='light'] .automaton-sim button.primary { color: #fff; }
+	.automaton-sim button[aria-pressed='true'] {
+		background: color-mix(in srgb, var(--sl-color-accent) 14%, var(--cse-surface));
+		border-color: var(--sl-color-accent);
+		font-weight: 600;
+	}
+	.automaton-sim .as-top { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; justify-content: space-between; }
+	.automaton-sim .as-chips, .automaton-sim .as-samples, .automaton-sim .as-buttons { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+	.automaton-sim .as-lang { margin: 0; color: var(--sl-color-gray-2); }
+	.automaton-sim .as-diagram { margin-block: 0.75rem; background: var(--cse-surface); border: 1px solid var(--cse-border); border-radius: 0.5rem; overflow-x: auto; }
+	.automaton-sim .as-svg { display: block; width: 100%; min-width: 460px; height: auto; font-family: var(--__sl-font); }
+	.automaton-sim .as-svg text { font-size: 15px; dominant-baseline: central; fill: var(--sl-color-gray-1); }
+	.automaton-sim .as-svg .as-elabel { font-size: 14px; fill: var(--sl-color-gray-2); paint-order: stroke; stroke: var(--cse-surface); stroke-width: 4px; }
+	.automaton-sim .as-svg .as-elabel.dg-t-b { fill: var(--cse-amber); font-weight: 700; }
+	.automaton-sim .as-svg .as-reject { fill: var(--cse-red-soft); stroke: var(--cse-red); stroke-width: 2; }
+	.automaton-sim .as-svg .as-t-reject { fill: var(--cse-red); font-weight: 700; }
+	.automaton-sim .as-tape-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+	.automaton-sim .as-label { color: var(--sl-color-gray-3); }
+	.automaton-sim .as-tape { display: flex; flex-wrap: wrap; gap: 3px; }
+	.automaton-sim .as-cell {
+		min-width: 2rem; height: 2.2rem; display: inline-grid; place-items: center;
+		border: 1.5px solid var(--sl-color-gray-4); border-radius: 0.3rem; background: var(--cse-surface);
+		font-family: var(--__sl-font-mono); font-size: 1rem;
+	}
+	.automaton-sim .as-cell.read { color: var(--sl-color-gray-3); background: var(--cse-surface-2); }
+	.automaton-sim .as-cell.next { border-color: var(--cse-amber); background: var(--cse-amber-soft); font-weight: 700; box-shadow: 0 3px 0 var(--cse-amber); }
+	.automaton-sim .as-cell.as-empty { padding-inline: 0.6rem; font-family: inherit; font-size: inherit; color: var(--sl-color-gray-3); }
+	.automaton-sim .as-controls { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: end; margin-block: 0.9rem 0.6rem; }
+	.automaton-sim .as-field { display: grid; gap: 0.2rem; color: var(--sl-color-gray-3); }
+	.automaton-sim .as-input {
+		font-family: var(--__sl-font-mono); font-size: 1rem; padding: 0.35rem 0.6rem; width: 12rem; max-width: 100%;
+		border: 1px solid var(--cse-border); border-radius: 0.4rem; background: var(--cse-surface); color: var(--sl-color-gray-1);
+	}
+	.automaton-sim .as-status { margin: 0.9rem 0 0.2rem; padding: 0.6rem 0.8rem; border-radius: 0.4rem; background: var(--cse-surface); border-left: 4px solid var(--cse-amber); }
+	.automaton-sim .as-status.ok { border-left-color: var(--cse-teal); background: var(--cse-teal-soft); }
+	.automaton-sim .as-status.bad { border-left-color: var(--cse-red); background: var(--cse-red-soft); }
+	.automaton-sim .as-notes { margin: 0.3rem 0 0; color: var(--sl-color-gray-2); min-height: 1.4em; }
+	.automaton-sim .as-cols { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 1rem; margin-top: 0.75rem; }
+	@media (max-width: 40rem) {
+		.automaton-sim .as-cols { grid-template-columns: 1fr; }
+		.automaton-sim .as-svg { min-width: 0; }
+		.automaton-sim .as-svg text { font-size: 21px; }
+		.automaton-sim .as-svg .as-elabel { font-size: 20px; }
+	}
+	.automaton-sim .as-h { margin: 0.4rem 0; font-size: var(--sl-text-sm); color: var(--sl-color-white); }
+	.automaton-sim .as-table-wrap { overflow-x: auto; }
+	.automaton-sim table { border-collapse: collapse; width: 100%; background: var(--cse-surface); }
+	.automaton-sim th, .automaton-sim td { border: 1px solid var(--cse-border); padding: 0.3rem 0.55rem; text-align: center; font-variant-numeric: tabular-nums; }
+	.automaton-sim thead th { background: var(--cse-surface-2); }
+	.automaton-sim tr.cur th { color: var(--cse-amber); }
+	.automaton-sim td.hot { background: var(--cse-amber-soft); outline: 2px solid var(--cse-amber); outline-offset: -2px; font-weight: 700; }
+	.automaton-sim .as-hint { margin: 0.35rem 0 0; color: var(--sl-color-gray-3); font-size: var(--sl-text-xs); }
+	.automaton-sim .as-trace { margin: 0; padding-left: 1.6rem; max-height: 14rem; overflow-y: auto; }
+	.automaton-sim .as-trace li { margin: 0.15rem 0; }
+	.automaton-sim .as-subset { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--cse-border); }
+	.automaton-sim .as-sub-table tr.fresh { background: var(--cse-teal-soft); }
+	.automaton-sim .as-sub-table tr.cur th { outline: 2px solid var(--cse-amber); outline-offset: -2px; color: var(--cse-amber); }
+	.automaton-sim .as-sub-status { margin: 0.6rem 0; }
+</style>
